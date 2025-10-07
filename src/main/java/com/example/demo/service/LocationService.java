@@ -7,6 +7,9 @@ import com.example.demo.model.Rate;
 import com.example.demo.repository.ImageRepository;
 import com.example.demo.repository.LocationRepository;
 import com.example.demo.repository.ReviewRepository;
+import com.example.demo.model.Administrator;
+import com.example.demo.model.Manages;
+import com.example.demo.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,14 +21,16 @@ public class LocationService {
     private final LocationRepository locationRepository;
     private final ReviewRepository reviewRepository;
     private final ImageRepository imageRepository;
+    private final UserRepository userRepository;
 
-    public LocationService(LocationRepository locationRepository, ReviewRepository reviewRepository, ImageRepository imageRepository) {
+    public LocationService(LocationRepository locationRepository, ReviewRepository reviewRepository, ImageRepository imageRepository, UserRepository userRepository) {
         this.locationRepository = locationRepository;
         this.reviewRepository = reviewRepository;
         this.imageRepository = imageRepository;
+        this.userRepository = userRepository;
     }
 
-	public Location create(Location location, List<String> imagePaths) {
+    public Location create(Location location, List<String> imagePaths) {
 		if (location.getName() == null || location.getAddress() == null || location.getType() == null || location.getDescription() == null) {
 			throw new IllegalArgumentException("Missing required fields");
 		}
@@ -42,7 +47,7 @@ public class LocationService {
 		return saved;
 	}
 
-	public Location update(String name, String address, String type, String description) {
+    public Location update(String name, String address, String type, String description) {
 		Location loc = locationRepository.findById(name).orElseThrow();
 		Optional.ofNullable(address).ifPresent(loc::setAddress);
 		Optional.ofNullable(type).ifPresent(loc::setType);
