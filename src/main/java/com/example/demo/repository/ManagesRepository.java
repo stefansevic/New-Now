@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ManagesRepository extends JpaRepository<Manages, LocalDate> {
 	List<Manages> findByUserEmailAndLocationName(String userEmail, String locationName);
+	List<Manages> findByLocationName(String locationName);
+	void deleteByUserEmailAndLocationName(String userEmail, String locationName);
 }
 
 
