@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 
 interface AuthToken {
   roles: string[];
+  sub: string;
 }
 
 @Injectable({
@@ -43,6 +44,20 @@ export class AuthService {
       try {
         const decodedToken: AuthToken = jwtDecode(token);
         return decodedToken.roles;
+      } catch (e) {
+        console.error('Error decoding token', e);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  getUserName(): string | null {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      try {
+        const decodedToken: AuthToken = jwtDecode(token);
+        return decodedToken.sub;
       } catch (e) {
         console.error('Error decoding token', e);
         return null;

@@ -31,17 +31,11 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe({
         next: (response) => {
-          console.log('LoginComponent response:', response); // Original log
           this.authService.storeToken(response.token);
-
-          console.log('Token after store:', response.token);
-          const roles = this.authService.getUserRoles();
-          console.log('Roles from token:', roles);
           const isAdmin = this.authService.isAdmin();
-          console.log('Is Admin check:', isAdmin);
 
           if (isAdmin) {
-            this.router.navigate(['/admin/requests']);
+            window.location.href = '/admin/home';
           } else {
             this.router.navigate(['/home']);
           }

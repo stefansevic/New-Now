@@ -38,12 +38,15 @@ public class SecurityConfig {
 				.csrf(csrf -> csrf.disable())
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.ico", "/*.json", "/*.png", "/assets/**", "/h2-console/**").permitAll()
-						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers("/api/auth/**", "/api/account-requests/**").permitAll()
-						.anyRequest().authenticated())
+						.requestMatchers("/api/auth/**").permitAll()
+						.requestMatchers("/api/**").authenticated()
+						.requestMatchers(HttpMethod.GET, "/**").permitAll()
+						.anyRequest().authenticated()
+				)
 				.authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+		http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
 		return http.build();
 	}
