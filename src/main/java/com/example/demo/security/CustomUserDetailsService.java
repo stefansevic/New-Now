@@ -27,10 +27,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 				.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 		
 		List<SimpleGrantedAuthority> authorities;
-		if ("admin@system.local".equals(user.getEmail())) {
-			authorities = Collections.singletonList(new SimpleGrantedAuthority("ADMIN"));
+		if (user instanceof Administrator) {
+			authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
 		} else {
-			authorities = Collections.singletonList(new SimpleGrantedAuthority("USER"));
+			authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 		}
 
 		return new org.springframework.security.core.userdetails.User(

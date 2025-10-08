@@ -1,1 +1,11 @@
-<p>home works!</p>
+<div class="home-container">
+  <div *ngIf="authService.isLoggedIn() && userName; else publicHome">
+    <h1>Welcome back, {{ userName }}!</h1>
+    <p>Explore locations and events.</p>
+  </div>
+
+  <ng-template #publicHome>
+    <h1>Welcome to our Application!</h1>
+    <p>Please <a routerLink="/login">login</a> or <a routerLink="/register">register</a> to continue.</p>
+  </ng-template>
+</div>

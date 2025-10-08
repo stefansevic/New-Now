@@ -7,6 +7,7 @@ import com.example.demo.repository.AccountRequestRepository;
 import com.example.demo.repository.UserRepository;
 import java.util.List;
 import java.time.LocalDate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,10 +15,12 @@ public class AccountRequestService {
 
     private final AccountRequestRepository accountRequestRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AccountRequestService(AccountRequestRepository accountRequestRepository, UserRepository userRepository) {
+    public AccountRequestService(AccountRequestRepository accountRequestRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.accountRequestRepository = accountRequestRepository;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
 	public AccountRequest submit(AccountRequest request) {
@@ -25,10 +28,10 @@ public class AccountRequestService {
 		if (userRepository.existsById(request.getEmail())) {
 			throw new IllegalStateException("User already exists");
 		}
-		// disallow duplicate non-rejected request for same email
+		// disallow duplicate PENDING or ACCEPTED request for same email
 		accountRequestRepository.findById(request.getEmail()).ifPresent(existing -> {
-			if (existing.getStatus() != RequestStatus.REJECTED) {
-				throw new IllegalStateException("Request already exists");
+			if (existing.getStatus() == RequestStatus.PENDING || existing.getStatus() == RequestStatus.ACCEPTED) {
+				throw new IllegalStateException("Request already exists and is pending or approved");
 			}
 		});
 		request.setStatus(RequestStatus.PENDING);
@@ -51,7 +54,7 @@ public class AccountRequestService {
 		accountRequestRepository.save(req);
 		User user = new User();
 		user.setEmail(req.getEmail());
-        user.setPassword(req.getPassword());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
 		user.setName(name);
 		user.setAddress(req.getAddress());
 		userRepository.save(user);
