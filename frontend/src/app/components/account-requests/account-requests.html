@@ -1,0 +1,13 @@
+<h2>Pending Registration Requests</h2>
+
+<div *ngIf="requests.length === 0">
+  <p>No pending requests.</p>
+</div>
+
+<ul *ngIf="requests.length > 0">
+  <li *ngFor="let request of requests">
+    {{ request.firstName }} {{ request.lastName }} ({{ request.email }})
+    <button (click)="approve(request.email)">Approve</button>
+    <button (click)="reject(request.email)">Reject</button>
+  </li>
+</ul>

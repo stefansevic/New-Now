@@ -1,0 +1,19 @@
+<div *ngIf="location">
+  <h2>{{ location.location.name }}</h2>
+  <p><strong>Address:</strong> {{ location.location.address }}</p>
+  <p><strong>Type:</strong> {{ location.location.type }}</p>
+  <p><strong>Description:</strong> {{ location.location.description }}</p>
+
+  <h3>Upcoming Events</h3>
+  <div *ngIf="location.events.length > 0; else noEvents">
+    <ul>
+      <li *ngFor="let event of location.events">
+        {{ event.name }} - {{ event.date }}
+      </li>
+    </ul>
+  </div>
+  <ng-template #noEvents>
+    <p>No upcoming events.</p>
+  </ng-template>
+
+</div>

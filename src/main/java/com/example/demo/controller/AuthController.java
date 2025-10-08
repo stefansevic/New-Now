@@ -6,6 +6,11 @@ import com.example.demo.repository.AccountRequestRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,24 +27,38 @@ public class AuthController {
     private final UserRepository userRepository;
     private final AccountRequestRepository accountRequestRepository;
     private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
-    public AuthController(UserRepository userRepository, AccountRequestRepository accountRequestRepository, JwtService jwtService) {
+    public AuthController(UserRepository userRepository, AccountRequestRepository accountRequestRepository, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.accountRequestRepository = accountRequestRepository;
         this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
     }
 
 	@PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-		// Check request status
-		AccountRequest ar = accountRequestRepository.findById(request.email()).orElse(null);
-		if (ar == null || ar.getStatus() != RequestStatus.ACCEPTED) {
-			return ResponseEntity.badRequest().body(new MessageResponse("Registration not accepted"));
-		}
-        return userRepository.findById(request.email())
-                .filter(u -> u.getPassword().equals(request.password()))
-                .<ResponseEntity<?>>map(u -> ResponseEntity.ok(new TokenResponse(jwtService.generateToken(u.getEmail()))))
-                .orElseGet(() -> ResponseEntity.badRequest().body(new MessageResponse("Invalid credentials")));
+        // Admin user does not have an AccountRequest, so we bypass this check for them.
+        if (!"admin@system.local".equals(request.email())) {
+            AccountRequest ar = accountRequestRepository.findById(request.email()).orElse(null);
+            if (ar == null || ar.getStatus() != RequestStatus.ACCEPTED) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Registration not accepted or does not exist."));
+            }
+        }
+
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.email(), request.password())
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String jwt = jwtService.generateToken(userDetails);
+
+            return ResponseEntity.ok(new TokenResponse(jwt));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Invalid credentials"));
+        }
 	}
 
 	@PostMapping("/logout")
