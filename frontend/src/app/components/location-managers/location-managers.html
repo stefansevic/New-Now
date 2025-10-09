@@ -1,0 +1,52 @@
+<div *ngIf="locationName">
+  <div class="header">
+    <h2>Manage Managers for {{ locationName }}</h2>
+    <a routerLink="/locations" class="btn btn-secondary">Back to Locations</a>
+  </div>
+
+  <!-- Add Manager Form -->
+  <div class="add-manager-section">
+    <h3>Add Manager</h3>
+    <form [formGroup]="addManagerForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="email">User Email:</label>
+        <select id="email" formControlName="email" class="form-control">
+          <option value="">Select a user...</option>
+          <option *ngFor="let user of availableUsers" [value]="user.email">
+            {{ user.email }} ({{ user.name }})
+          </option>
+        </select>
+      </div>
+      
+      
+      <button type="submit" [disabled]="addManagerForm.invalid" class="btn btn-primary">
+        Add Manager
+      </button>
+    </form>
+  </div>
+
+  <!-- Current Managers -->
+  <div class="managers-section">
+    <h3>Current Managers</h3>
+    <div *ngIf="managers.length === 0" class="no-managers">
+      <p>No managers assigned to this location.</p>
+    </div>
+    
+    <div *ngIf="managers.length > 0" class="managers-list">
+      <div *ngFor="let manager of managers" class="manager-card">
+        <div class="manager-info">
+          <div class="manager-email">{{ manager.user.email }}</div>
+          <div class="manager-name">{{ manager.user.name }}</div>
+          <div class="status active">
+            Active Manager
+          </div>
+        </div>
+        <div class="manager-actions">
+          <button (click)="removeManager(manager.user.email)" class="btn btn-danger btn-sm">
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

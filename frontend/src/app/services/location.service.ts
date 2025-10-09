@@ -36,4 +36,29 @@ export class LocationService {
     files.forEach(f => formData.append('files', f));
     return this.http.post<string[]>(`/api/uploads`, formData);
   }
+
+  // Manager management methods
+  getLocationManagers(locationName: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/${locationName}/managers`);
+  }
+
+  addManager(locationName: string, email: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/${locationName}/managers`, null, { params: { email } });
+  }
+
+  removeManager(locationName: string, email: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${locationName}/managers/${email}`);
+  }
+
+  getAllUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/users`);
+  }
+
+  getAvailableUsers(locationName: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/${locationName}/available-users`);
+  }
+
+  getMyManagedLocations(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/my-managed-locations`);
+  }
 }

@@ -2,6 +2,7 @@
   <ul>
     <li><a [routerLink]="homeRoute">Home</a></li>
     <li><a routerLink="/locations">Locations</a></li>
+    <li *ngIf="isLoggedIn && !isAdmin"><a routerLink="/my-locations">My Locations</a></li>
     <li *ngIf="!isLoggedIn"><a routerLink="/login">Login</a></li>
     <li *ngIf="!isLoggedIn"><a routerLink="/register">Register</a></li>
     <li *ngIf="isAdmin"><a routerLink="/requests">Requests</a></li>

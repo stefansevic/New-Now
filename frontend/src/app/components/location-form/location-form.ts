@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LocationService } from '../../services/location.service';
+import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-location-form',
@@ -11,18 +13,21 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
-export class LocationFormComponent implements OnInit {
+export class LocationFormComponent implements OnInit, OnDestroy {
   locationForm: FormGroup;
   isEditMode: boolean = false;
   locationName: string | null = null;
   selectedImages: string[] = [];
   selectedFiles: File[] = [];
+  isAdmin: boolean = false;
+  private adminSubscription!: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private locationService: LocationService
+    private locationService: LocationService,
+    private authService: AuthService
   ) {
     this.locationForm = this.fb.group({
       name: ['', Validators.required],
@@ -33,6 +38,10 @@ export class LocationFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.adminSubscription = this.authService.isAdmin$.subscribe(isAdmin => {
+      this.isAdmin = isAdmin;
+    });
+
     this.locationName = this.route.snapshot.paramMap.get('name');
     this.isEditMode = !!this.locationName;
 
@@ -49,6 +58,12 @@ export class LocationFormComponent implements OnInit {
         },
         error: (err) => console.error(err)
       });
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.adminSubscription) {
+      this.adminSubscription.unsubscribe();
     }
   }
 
@@ -88,7 +103,12 @@ export class LocationFormComponent implements OnInit {
         type: formData.type,
         description: formData.description
       }).subscribe({
-        next: () => this.router.navigate(['/locations']),
+        next: () => {
+          // Navigate to /my-locations if user is not admin (i.e., is a manager)
+          // Navigate to /locations if user is admin
+          const targetRoute = this.isAdmin ? '/locations' : '/my-locations';
+          this.router.navigate([targetRoute]);
+        },
         error: (err) => console.error(err)
       });
     } else {

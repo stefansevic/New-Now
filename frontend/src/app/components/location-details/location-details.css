@@ -106,6 +106,15 @@
   background-color: #c82333;
 }
 
+.btn-manage {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.btn-manage:hover {
+  background-color: #138496;
+}
+
 .events-section {
   background: #f8f9fa;
   padding: 20px;

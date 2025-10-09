@@ -1,0 +1,40 @@
+<div *ngIf="isLoggedIn">
+  <h2>My Managed Locations</h2>
+  
+  <div *ngIf="managedLocations.length === 0" class="no-locations">
+    <p>You are not managing any locations.</p>
+  </div>
+  
+  <div *ngIf="managedLocations.length > 0" class="locations-grid">
+    <div *ngFor="let location of managedLocations" class="location-card">
+      <div class="location-image-container">
+        <img *ngIf="location.images && location.images.length > 0" 
+             [src]="getImageUrl(location.images[0].path)" 
+             [alt]="location.location.name"
+             class="location-thumbnail">
+        <div *ngIf="!location.images || location.images.length === 0" class="no-image">
+          No Image
+        </div>
+      </div>
+      
+      <div class="location-info">
+        <h3>
+          <a [routerLink]="['/locations', location.location.name]">{{ location.location.name }}</a>
+        </h3>
+        <p class="address">{{ location.location.address }}</p>
+        <p class="type">{{ location.location.type }}</p>
+        <div class="management-info">
+          <p><strong>Status:</strong> Active Manager</p>
+        </div>
+      </div>
+      
+      <div class="manager-actions">
+        <a [routerLink]="['/locations/edit', location.location.name]" class="btn btn-sm btn-edit">Edit</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!isLoggedIn" class="not-logged-in">
+  <p>Please log in to view your managed locations.</p>
+</div>

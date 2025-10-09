@@ -36,6 +36,9 @@
     <button routerLink="/locations/edit/{{ location.location.name }}" class="btn btn-edit">
       Edit Location
     </button>
+    <button routerLink="/locations/{{ location.location.name }}/managers" class="btn btn-manage">
+      Manage Managers
+    </button>
     <button (click)="deleteLocation()" class="btn btn-delete">
       Delete Location
     </button>

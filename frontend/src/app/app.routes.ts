@@ -3,6 +3,8 @@ import { HomeComponent } from './components/home/home';
 import { LocationsComponent } from './components/locations/locations';
 import { LocationDetailsComponent } from './components/location-details/location-details';
 import { LocationFormComponent } from './components/location-form/location-form';
+import { LocationManagersComponent } from './components/location-managers/location-managers';
+import { MyLocationsComponent } from './components/my-locations/my-locations';
 import { LoginComponent } from './components/login/login';
 import { RegisterComponent } from './components/register/register';
 import { AccountRequestsComponent } from './components/account-requests/account-requests';
@@ -19,5 +21,7 @@ export const routes: Routes = [
   { path: 'locations', component: LocationsComponent },
   { path: 'locations/new', component: LocationFormComponent },
   { path: 'locations/edit/:name', component: LocationFormComponent },
+  { path: 'locations/:name/managers', component: LocationManagersComponent },
   { path: 'locations/:name', component: LocationDetailsComponent },
+  { path: 'my-locations', component: MyLocationsComponent },
 ];
