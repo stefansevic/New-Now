@@ -1,11 +1,12 @@
 <div *ngIf="isLoggedIn">
   <h2>My Managed Locations</h2>
   
-  <div *ngIf="managedLocations.length === 0" class="no-locations">
+  <div *ngIf="!isManager" class="no-locations">
     <p>You are not managing any locations.</p>
+    <p>Only location managers can access this page.</p>
   </div>
   
-  <div *ngIf="managedLocations.length > 0" class="locations-grid">
+  <div *ngIf="isManager && managedLocations.length > 0" class="locations-grid">
     <div *ngFor="let location of managedLocations" class="location-card">
       <div class="location-image-container">
         <img *ngIf="location.images && location.images.length > 0" 

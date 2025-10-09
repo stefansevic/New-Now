@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { LocationService } from '../../services/location.service';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 
@@ -14,17 +15,39 @@ import { Subscription } from 'rxjs';
 export class NavbarComponent implements OnInit, OnDestroy {
   isLoggedIn: boolean = false;
   isAdmin: boolean = false;
+  isManager: boolean = false;
   private authSubscription!: Subscription;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService, 
+    private router: Router,
+    private locationService: LocationService
+  ) {}
 
   ngOnInit(): void {
     this.authSubscription = this.authService.loggedIn$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
+      if (loggedIn) {
+        this.checkIfManager();
+      } else {
+        this.isManager = false;
+      }
     });
     this.authSubscription.add(this.authService.isAdmin$.subscribe(isAdmin => {
       this.isAdmin = isAdmin;
     }));
+  }
+
+  private checkIfManager(): void {
+    this.locationService.getMyManagedLocations().subscribe({
+      next: (locations) => {
+        this.isManager = locations.length > 0;
+      },
+      error: (err) => {
+        console.error('Error checking manager status:', err);
+        this.isManager = false;
+      }
+    });
   }
 
   ngOnDestroy(): void {

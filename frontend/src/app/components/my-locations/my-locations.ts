@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 export class MyLocationsComponent implements OnInit, OnDestroy {
   managedLocations: any[] = [];
   isLoggedIn: boolean = false;
+  isManager: boolean = false;
   private authSubscription!: Subscription;
 
   constructor(
@@ -27,6 +28,9 @@ export class MyLocationsComponent implements OnInit, OnDestroy {
       this.isLoggedIn = loggedIn;
       if (loggedIn) {
         this.loadManagedLocations();
+      } else {
+        this.isManager = false;
+        this.managedLocations = [];
       }
     });
   }
@@ -42,8 +46,13 @@ export class MyLocationsComponent implements OnInit, OnDestroy {
       next: (data) => {
         console.log('Managed locations loaded:', data);
         this.managedLocations = data;
+        this.isManager = data.length > 0;
       },
-      error: (err) => console.error('Error loading managed locations:', err)
+      error: (err) => {
+        console.error('Error loading managed locations:', err);
+        this.isManager = false;
+        this.managedLocations = [];
+      }
     });
   }
 
