@@ -75,23 +75,46 @@ public class LocationService {
     public LocationDetails getDetails(String name) {
         Location location = locationRepository.findById(name).orElseThrow();
         double avgRating = computeAverageRating(location);
-        return new LocationDetails(location, avgRating);
+        List<Image> images = imageRepository.findByLocation(location);
+        return new LocationDetails(location, avgRating, images);
     }
 
 	public List<LocationDetails> listAll() {
 		List<Location> locations = locationRepository.findAll();
 		List<LocationDetails> details = new ArrayList<>();
 		for (Location l : locations) {
-			details.add(new LocationDetails(l, computeAverageRating(l)));
+			List<Image> images = imageRepository.findByLocation(l);
+			details.add(new LocationDetails(l, computeAverageRating(l), images));
 		}
 		return details;
 	}
 
     public void delete(String name) {
+        Location location = locationRepository.findById(name).orElseThrow();
+        
+        // Delete associated images from database
+        List<Image> images = imageRepository.findByLocation(location);
+        imageRepository.deleteAll(images);
+        
+        // Delete image files from disk
+        for (Image image : images) {
+            try {
+                String imagePath = image.getPath();
+                if (imagePath.startsWith("/uploads/")) {
+                    String fileName = imagePath.substring("/uploads/".length());
+                    java.nio.file.Path filePath = java.nio.file.Paths.get("uploads", fileName);
+                    java.nio.file.Files.deleteIfExists(filePath);
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to delete image file: " + image.getPath());
+            }
+        }
+        
+        // Delete the location
         locationRepository.deleteById(name);
     }
 
-    public record LocationDetails(Location location, double averageRating) {}
+    public record LocationDetails(Location location, double averageRating, List<Image> images) {}
 }
 
 

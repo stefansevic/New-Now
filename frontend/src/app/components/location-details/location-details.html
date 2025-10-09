@@ -1,19 +1,59 @@
 <div *ngIf="location">
-  <h2>{{ location.location.name }}</h2>
-  <p><strong>Address:</strong> {{ location.location.address }}</p>
-  <p><strong>Type:</strong> {{ location.location.type }}</p>
-  <p><strong>Description:</strong> {{ location.location.description }}</p>
-
-  <h3>Upcoming Events</h3>
-  <div *ngIf="location.events.length > 0; else noEvents">
-    <ul>
-      <li *ngFor="let event of location.events">
-        {{ event.name }} - {{ event.date }}
-      </li>
-    </ul>
+  <div class="location-header">
+    <h2>{{ location.location.name }}</h2>
+    <div class="rating">
+      <span class="rating-label">Average Rating:</span>
+      <span class="rating-value">{{ location.averageRating.toFixed(1) }}/5.0</span>
+    </div>
   </div>
-  <ng-template #noEvents>
-    <p>No upcoming events.</p>
-  </ng-template>
+
+  <!-- Images Gallery -->
+  <div *ngIf="location.images && location.images.length > 0" class="images-section">
+    <h3>Images</h3>
+    <div class="image-gallery">
+      <img *ngFor="let image of location.images" 
+           [src]="getImageUrl(image.path)" 
+           [alt]="location.location.name"
+           class="location-image">
+    </div>
+  </div>
+
+  <!-- Location Details -->
+  <div class="location-details">
+    <div class="detail-item">
+      <strong>Address:</strong> {{ location.location.address }}
+    </div>
+    <div class="detail-item">
+      <strong>Type:</strong> {{ location.location.type }}
+    </div>
+    <div class="detail-item">
+      <strong>Description:</strong> {{ location.location.description }}
+    </div>
+  </div>
+
+  <!-- Admin Actions -->
+  <div *ngIf="isAdmin" class="admin-actions">
+    <button routerLink="/locations/edit/{{ location.location.name }}" class="btn btn-edit">
+      Edit Location
+    </button>
+    <button (click)="deleteLocation()" class="btn btn-delete">
+      Delete Location
+    </button>
+  </div>
+
+  <!-- Events Section -->
+  <div class="events-section">
+    <h3>Upcoming Events</h3>
+    <div *ngIf="location.events && location.events.length > 0; else noEvents">
+      <ul>
+        <li *ngFor="let event of location.events">
+          {{ event.name }} - {{ event.date }}
+        </li>
+      </ul>
+    </div>
+    <ng-template #noEvents>
+      <p>No upcoming events.</p>
+    </ng-template>
+  </div>
 
 </div>

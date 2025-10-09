@@ -42,9 +42,22 @@ export class LocationsComponent implements OnInit, OnDestroy {
   deleteLocation(name: string): void {
     if (confirm('Are you sure you want to delete this location?')) {
       this.locationService.deleteLocation(name).subscribe({
-        next: () => this.loadLocations(),
-        error: (err) => console.error(err)
+        next: () => {
+          console.log('Location deleted successfully');
+          this.loadLocations();
+        },
+        error: (err) => {
+          console.error('Error deleting location:', err);
+          alert('Failed to delete location. Please try again.');
+        }
       });
     }
+  }
+
+  getImageUrl(imagePath: string): string {
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    return `http://localhost:8080${imagePath}`;
   }
 }

@@ -1,15 +1,38 @@
 <h2>Locations</h2>
-<div *ngIf="isAdmin">
-  <a routerLink="/locations/new">Create New Location</a>
+<div *ngIf="isAdmin" class="admin-header">
+  <a routerLink="/locations/new" class="btn btn-primary">Create New Location</a>
 </div>
-<div *ngFor="let item of locations">
-  <h3>
-    <a [routerLink]="['/locations', item.location.name]">{{ item.location.name }}</a>
-    <span> (Average Rating: {{ item.averageRating.toFixed(1) }})</span>
-  </h3>
-  <p>{{ item.location.address }}</p>
-  <div *ngIf="isAdmin">
-    <a [routerLink]="['/locations/edit', item.location.name]">Edit</a>
-    <button (click)="deleteLocation(item.location.name)">Delete</button>
+
+<div class="locations-grid">
+  <div *ngFor="let item of locations" class="location-card">
+    <!-- Location Image -->
+    <div class="location-image-container">
+      <img *ngIf="item.images && item.images.length > 0" 
+           [src]="getImageUrl(item.images[0].path)" 
+           [alt]="item.location.name"
+           class="location-thumbnail">
+      <div *ngIf="!item.images || item.images.length === 0" class="no-image">
+        No Image
+      </div>
+    </div>
+
+    <!-- Location Info -->
+    <div class="location-info">
+      <h3>
+        <a [routerLink]="['/locations', item.location.name]">{{ item.location.name }}</a>
+      </h3>
+      <div class="rating">
+        <span class="rating-stars">★★★★★</span>
+        <span class="rating-value">{{ item.averageRating.toFixed(1) }}</span>
+      </div>
+      <p class="address">{{ item.location.address }}</p>
+      <p class="type">{{ item.location.type }}</p>
+    </div>
+
+    <!-- Admin Actions -->
+    <div *ngIf="isAdmin" class="admin-actions">
+      <a [routerLink]="['/locations/edit', item.location.name]" class="btn btn-sm btn-edit">Edit</a>
+      <button (click)="deleteLocation(item.location.name)" class="btn btn-sm btn-delete">Delete</button>
+    </div>
   </div>
 </div>
