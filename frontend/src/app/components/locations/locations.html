@@ -1,7 +1,15 @@
 <h2>Locations</h2>
-<div *ngFor="let location of locations">
+<div *ngIf="isAdmin">
+  <a routerLink="/locations/new">Create New Location</a>
+</div>
+<div *ngFor="let item of locations">
   <h3>
-    <a [routerLink]="['/locations', location.name]">{{ location.name }}</a>
+    <a [routerLink]="['/locations', item.location.name]">{{ item.location.name }}</a>
+    <span> (Average Rating: {{ item.averageRating.toFixed(1) }})</span>
   </h3>
-  <p>{{ location.address }}</p>
+  <p>{{ item.location.address }}</p>
+  <div *ngIf="isAdmin">
+    <a [routerLink]="['/locations/edit', item.location.name]">Edit</a>
+    <button (click)="deleteLocation(item.location.name)">Delete</button>
+  </div>
 </div>

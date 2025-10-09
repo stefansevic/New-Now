@@ -39,6 +39,7 @@ public class SecurityConfig {
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/api/auth/**", "/api/account-requests/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/locations/**").permitAll()
 						.requestMatchers("/api/**").authenticated()
 						.requestMatchers(HttpMethod.GET, "/**").permitAll()
 						.anyRequest().authenticated()
@@ -54,7 +55,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://localhost:8081"));
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://localhost:8080"));
 		configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 		configuration.setAllowCredentials(true);

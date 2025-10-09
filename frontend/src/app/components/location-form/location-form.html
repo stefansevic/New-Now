@@ -1,0 +1,38 @@
+<h2>{{ isEditMode ? 'Edit Location' : 'Create Location' }}</h2>
+<form [formGroup]="locationForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label for="name">Name:</label>
+    <input id="name" formControlName="name">
+  </div>
+  <div>
+    <label for="address">Address:</label>
+    <input id="address" formControlName="address">
+  </div>
+  <div>
+    <label for="type">Type:</label>
+    <input id="type" formControlName="type">
+  </div>
+  <div>
+    <label for="description">Description:</label>
+    <textarea id="description" formControlName="description"></textarea>
+  </div>
+
+  <div *ngIf="!isEditMode">
+    <label>Images:</label>
+    <div>
+      <input type="file" accept="image/*" (change)="onFilesSelected($event)" multiple>
+    </div>
+    <div *ngIf="selectedImages.length > 0">
+      <p>Selected:</p>
+      <ul>
+        <li *ngFor="let img of selectedImages; let i = index">
+          <img [src]="img" alt="preview" style="max-width: 120px; max-height: 90px; margin-right: 8px; vertical-align: middle;">
+          <button type="button" (click)="removeImage(i)">Remove</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <button type="submit" [disabled]="locationForm.invalid">Submit</button>
+  <a routerLink="/locations">Cancel</a>
+</form>

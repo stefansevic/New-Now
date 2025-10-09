@@ -30,12 +30,9 @@ export class LoginComponent {
     this.errorMessage = null;
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe({
-        next: (response) => {
-          this.authService.storeToken(response.token);
-          const isAdmin = this.authService.isAdmin();
-
-          if (isAdmin) {
-            window.location.href = '/admin/home';
+        next: () => {
+          if (this.authService.isAdmin()) {
+            this.router.navigate(['/admin/home']);
           } else {
             this.router.navigate(['/home']);
           }

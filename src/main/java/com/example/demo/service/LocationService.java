@@ -7,9 +7,6 @@ import com.example.demo.model.Rate;
 import com.example.demo.repository.ImageRepository;
 import com.example.demo.repository.LocationRepository;
 import com.example.demo.repository.ReviewRepository;
-import com.example.demo.model.Administrator;
-import com.example.demo.model.Manages;
-import com.example.demo.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,13 +18,11 @@ public class LocationService {
     private final LocationRepository locationRepository;
     private final ReviewRepository reviewRepository;
     private final ImageRepository imageRepository;
-    private final UserRepository userRepository;
 
-    public LocationService(LocationRepository locationRepository, ReviewRepository reviewRepository, ImageRepository imageRepository, UserRepository userRepository) {
+    public LocationService(LocationRepository locationRepository, ReviewRepository reviewRepository, ImageRepository imageRepository) {
         this.locationRepository = locationRepository;
         this.reviewRepository = reviewRepository;
         this.imageRepository = imageRepository;
-        this.userRepository = userRepository;
     }
 
     public Location create(Location location, List<String> imagePaths) {
@@ -83,9 +78,18 @@ public class LocationService {
         return new LocationDetails(location, avgRating);
     }
 
-	public List<Location> listAll() {
-		return locationRepository.findAll();
+	public List<LocationDetails> listAll() {
+		List<Location> locations = locationRepository.findAll();
+		List<LocationDetails> details = new ArrayList<>();
+		for (Location l : locations) {
+			details.add(new LocationDetails(l, computeAverageRating(l)));
+		}
+		return details;
 	}
+
+    public void delete(String name) {
+        locationRepository.deleteById(name);
+    }
 
     public record LocationDetails(Location location, double averageRating) {}
 }

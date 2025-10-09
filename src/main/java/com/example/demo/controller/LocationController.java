@@ -65,9 +65,18 @@ public class LocationController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<Location>> list() {
+	public ResponseEntity<List<LocationService.LocationDetails>> list() {
 		return ResponseEntity.ok(locationService.listAll());
 	}
+
+    @DeleteMapping("/{name}")
+    public ResponseEntity<?> delete(@AuthenticationPrincipal UserDetails principal, @PathVariable String name) {
+        if (principal == null || !principal.getUsername().equals("admin@system.local")) {
+            return ResponseEntity.status(403).build();
+        }
+        locationService.delete(name);
+        return ResponseEntity.ok().build();
+    }
 
 	// A2: Admin-only - add manager to a location
 	@PostMapping("/{name}/managers")

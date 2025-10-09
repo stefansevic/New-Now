@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Column;
 
 @Entity
 public class Image {
@@ -17,6 +19,7 @@ public class Image {
 	private Event event;
 
 	@Id
+	@Column(length = 1024)
 	private String path;
 
 	public Location getLocation() {

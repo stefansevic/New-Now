@@ -1,10 +1,10 @@
 <nav>
   <ul>
-    <li><a routerLink="/home">Home</a></li>
+    <li><a [routerLink]="homeRoute">Home</a></li>
     <li><a routerLink="/locations">Locations</a></li>
-    <li *ngIf="!authService.isLoggedIn()"><a routerLink="/login">Login</a></li>
-    <li *ngIf="!authService.isLoggedIn()"><a routerLink="/register">Register</a></li>
-    <li *ngIf="authService.isAdmin()"><a routerLink="/admin/requests">Requests</a></li>
-    <li *ngIf="authService.isLoggedIn()"><a (click)="logout()" style="cursor: pointer;">Logout</a></li>
+    <li *ngIf="!isLoggedIn"><a routerLink="/login">Login</a></li>
+    <li *ngIf="!isLoggedIn"><a routerLink="/register">Register</a></li>
+    <li *ngIf="isAdmin"><a routerLink="/requests">Requests</a></li>
+    <li *ngIf="isLoggedIn"><a (click)="logout()" style="cursor: pointer;">Logout</a></li>
   </ul>
 </nav>
