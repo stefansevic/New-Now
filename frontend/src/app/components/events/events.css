@@ -21,6 +21,70 @@
   margin: 0;
 }
 
+/* Filters Section */
+.filters-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.filter-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+}
+
+.filter-group label input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.filter-input,
+.filter-select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.filter-input::placeholder {
+  color: #999;
+}
+
+.results-info {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+  color: #666;
+  font-size: 14px;
+  font-style: italic;
+  text-align: center;
+}
+
 .loading {
   text-align: center;
   padding: 60px 20px;

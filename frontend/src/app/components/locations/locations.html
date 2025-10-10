@@ -1,10 +1,40 @@
 <h2>Locations</h2>
+
+<!-- Admin Actions -->
 <div *ngIf="isAdmin" class="admin-header">
   <a routerLink="/locations/new" class="btn btn-primary">Create New Location</a>
 </div>
 
+<!-- Search and Filter Section -->
+<div class="filters-section">
+  <div class="filter-group">
+    <label>Search by Name:</label>
+    <input type="text" [(ngModel)]="searchName" (ngModelChange)="applyFilters()" 
+           placeholder="Enter location name..." class="filter-input">
+  </div>
+
+  <div class="filter-group">
+    <label>Search by Address:</label>
+    <input type="text" [(ngModel)]="searchAddress" (ngModelChange)="applyFilters()" 
+           placeholder="Enter address..." class="filter-input">
+  </div>
+
+  <div class="filter-group">
+    <label>Filter by Type:</label>
+    <select [(ngModel)]="filterType" (ngModelChange)="applyFilters()" class="filter-select">
+      <option value="">All Types</option>
+      <option *ngFor="let type of getUniqueTypes()" [value]="type">{{ type }}</option>
+    </select>
+  </div>
+</div>
+
+<!-- Results Count -->
+<div class="results-info">
+  Showing {{ filteredLocations.length }} of {{ locations.length }} locations
+</div>
+
 <div class="locations-grid">
-  <div *ngFor="let item of locations" class="location-card">
+  <div *ngFor="let item of filteredLocations" class="location-card">
     <!-- Location Image -->
     <div class="location-image-container">
       <img *ngIf="item.images && item.images.length > 0" 

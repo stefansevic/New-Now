@@ -3,6 +3,7 @@ import { LocationService } from '../../services/location.service';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -10,12 +11,18 @@ import { Subscription } from 'rxjs';
   templateUrl: './locations.html',
   styleUrls: ['./locations.css'],
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [CommonModule, RouterModule, FormsModule]
 })
 export class LocationsComponent implements OnInit, OnDestroy {
   locations: any[] = [];
+  filteredLocations: any[] = [];
   isAdmin: boolean = false;
   private adminSubscription!: Subscription;
+
+  // Filter properties
+  searchName: string = '';
+  searchAddress: string = '';
+  filterType: string = '';
 
   constructor(private locationService: LocationService, private authService: AuthService) { }
 
@@ -34,9 +41,37 @@ export class LocationsComponent implements OnInit, OnDestroy {
 
   loadLocations(): void {
     this.locationService.getLocations().subscribe({
-      next: (data) => this.locations = data,
+      next: (data) => {
+        this.locations = data;
+        this.applyFilters();
+      },
       error: (err) => console.error(err)
     });
+  }
+
+  applyFilters(): void {
+    this.filteredLocations = this.locations.filter(item => {
+      const location = item.location;
+      
+      // Filter by name
+      const matchesName = !this.searchName || 
+        location.name.toLowerCase().includes(this.searchName.toLowerCase());
+      
+      // Filter by address
+      const matchesAddress = !this.searchAddress || 
+        location.address.toLowerCase().includes(this.searchAddress.toLowerCase());
+      
+      // Filter by type
+      const matchesType = !this.filterType || 
+        location.type.toLowerCase() === this.filterType.toLowerCase();
+      
+      return matchesName && matchesAddress && matchesType;
+    });
+  }
+
+  getUniqueTypes(): string[] {
+    const types = this.locations.map(item => item.location.type);
+    return [...new Set(types)].sort();
   }
 
   deleteLocation(name: string): void {
