@@ -1,0 +1,151 @@
+package com.example.demo.controller;
+
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+record CreateReviewRequest(
+    String locationName,
+    String eventName,
+    String commentText,
+    Integer performance,
+    Integer soundAndLightning,
+    Integer venue,
+    Integer overallImpression
+) {}
+
+@RestController
+@RequestMapping("/api/reviews")
+public class ReviewController {
+
+    private final ReviewRepository reviewRepository;
+    private final LocationRepository locationRepository;
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+    private final RateRepository rateRepository;
+    private final CommentRepository commentRepository;
+
+    public ReviewController(ReviewRepository reviewRepository, LocationRepository locationRepository,
+                          EventRepository eventRepository, UserRepository userRepository,
+                          RateRepository rateRepository, CommentRepository commentRepository) {
+        this.reviewRepository = reviewRepository;
+        this.locationRepository = locationRepository;
+        this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
+        this.rateRepository = rateRepository;
+        this.commentRepository = commentRepository;
+    }
+
+    @PostMapping
+    @Transactional
+    public ResponseEntity<?> createReview(@AuthenticationPrincipal UserDetails principal, 
+                                         @RequestBody CreateReviewRequest req) {
+        if (principal == null) return ResponseEntity.status(401).build();
+
+        // Get location
+        Location location = locationRepository.findById(req.locationName()).orElse(null);
+        if (location == null) return ResponseEntity.badRequest().body("Location not found");
+
+        // Get event
+        Event event = eventRepository.findById(req.eventName()).orElse(null);
+        if (event == null) return ResponseEntity.badRequest().body("Event not found");
+
+        // Validation 1: Event must be recurrent
+        if (event.getRecurrent() == null || !event.getRecurrent()) {
+            return ResponseEntity.badRequest().body("Reviews can only be left for recurrent events");
+        }
+
+        // Validation 2: Event must have already occurred
+        if (event.getDate() == null || !event.getDate().isBefore(LocalDate.now())) {
+            return ResponseEntity.badRequest().body("Reviews can only be left for past events");
+        }
+
+        // Validation 3: Event must belong to the location
+        if (!event.getLocation().getName().equals(location.getName())) {
+            return ResponseEntity.badRequest().body("Event does not belong to this location");
+        }
+
+        // Calculate event count (how many times this recurrent event has occurred)
+        int eventCount = eventRepository.countByNameAndLocationAndDateBefore(
+            event.getName(), 
+            location, 
+            LocalDate.now()
+        );
+
+        // Get user
+        User user = userRepository.findById(principal.getUsername()).orElse(null);
+        if (user == null) return ResponseEntity.status(401).build();
+
+        // Create Rate if at least one rating is provided
+        Rate rate = null;
+        if (req.performance() != null || req.soundAndLightning() != null || 
+            req.venue() != null || req.overallImpression() != null) {
+            
+            rate = new Rate();
+            rate.setPerformance(req.performance());
+            rate.setSoundAndLightning(req.soundAndLightning());
+            rate.setVenue(req.venue());
+            rate.setOverallImpression(req.overallImpression());
+            rate = rateRepository.save(rate);
+        }
+
+        // Create Review
+        Review review = new Review();
+        review.setCreatedAt(LocalDateTime.now());
+        review.setUser(user);
+        review.setLocation(location);
+        review.setEvent(event);
+        review.setEventCount(eventCount);
+        review.setHidden(false);
+        review.setRate(rate);
+
+        review = reviewRepository.save(review);
+
+        // Create Comment if text is provided
+        if (req.commentText() != null && !req.commentText().trim().isEmpty()) {
+            Comment comment = new Comment();
+            comment.setCreatedAt(LocalDateTime.now());
+            comment.setText(req.commentText());
+            comment.setUser(user);
+            comment.setReview(review);
+            comment.setParent(null);
+            commentRepository.save(comment);
+        }
+
+        return ResponseEntity.ok(review);
+    }
+
+    @GetMapping("/location/{locationName}")
+    public ResponseEntity<List<Review>> getReviewsByLocation(@PathVariable String locationName) {
+        Location location = locationRepository.findById(locationName).orElse(null);
+        if (location == null) return ResponseEntity.badRequest().build();
+
+        List<Review> reviews = reviewRepository.findByLocation(location);
+        return ResponseEntity.ok(reviews);
+    }
+
+    // Get eligible events for review (recurrent and past events)
+    @GetMapping("/location/{locationName}/eligible-events")
+    public ResponseEntity<List<Event>> getEligibleEvents(@PathVariable String locationName) {
+        Location location = locationRepository.findById(locationName).orElse(null);
+        if (location == null) return ResponseEntity.badRequest().build();
+
+        // Get all events for this location
+        List<Event> allEvents = eventRepository.findAll().stream()
+            .filter(e -> e.getLocation().getName().equals(locationName))
+            .filter(e -> e.getRecurrent() != null && e.getRecurrent()) // Must be recurrent
+            .filter(e -> e.getDate() != null && e.getDate().isBefore(LocalDate.now())) // Must be in the past
+            .toList();
+
+        return ResponseEntity.ok(allEvents);
+    }
+}
+
