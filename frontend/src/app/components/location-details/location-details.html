@@ -44,6 +44,117 @@
     </button>
   </div>
 
+  <!-- Reviews Section -->
+  <div class="reviews-section">
+    <div class="reviews-header">
+      <h3>Reviews</h3>
+      <button *ngIf="isLoggedIn && !showReviewForm" (click)="openReviewForm()" class="btn btn-create">
+        Leave a Review
+      </button>
+    </div>
+
+    <!-- Review Form -->
+    <div *ngIf="showReviewForm" class="review-form">
+      <h4>Write a Review</h4>
+      <form (ngSubmit)="saveReview()">
+        <div class="form-group">
+          <label>Select Event (must be recurrent and already occurred):</label>
+          <select [(ngModel)]="reviewForm.eventName" name="eventName" required>
+            <option value="">-- Select Event --</option>
+            <option *ngFor="let event of eligibleEvents" [value]="event.name">
+              {{ event.name }} ({{ event.date }})
+            </option>
+          </select>
+          <p *ngIf="eligibleEvents.length === 0" class="info-text">
+            No eligible events for review. Events must be recurrent and already occurred.
+          </p>
+        </div>
+
+        <div class="ratings-section">
+          <h5>Ratings (1-10, optional)</h5>
+          
+          <div class="form-group rating-group">
+            <label>Performance:</label>
+            <input type="number" [(ngModel)]="reviewForm.performance" name="performance" 
+                   min="1" max="10" placeholder="1-10">
+          </div>
+
+          <div class="form-group rating-group">
+            <label>Sound & Lightning:</label>
+            <input type="number" [(ngModel)]="reviewForm.soundAndLightning" name="soundAndLightning" 
+                   min="1" max="10" placeholder="1-10">
+          </div>
+
+          <div class="form-group rating-group">
+            <label>Venue:</label>
+            <input type="number" [(ngModel)]="reviewForm.venue" name="venue" 
+                   min="1" max="10" placeholder="1-10">
+          </div>
+
+          <div class="form-group rating-group">
+            <label>Overall Impression:</label>
+            <input type="number" [(ngModel)]="reviewForm.overallImpression" name="overallImpression" 
+                   min="1" max="10" placeholder="1-10">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Comment (optional):</label>
+          <textarea [(ngModel)]="reviewForm.commentText" name="commentText" 
+                    rows="4" placeholder="Share your experience..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-save">Submit Review</button>
+          <button type="button" (click)="cancelReviewForm()" class="btn btn-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Reviews List -->
+    <div *ngIf="reviews && reviews.length > 0; else noReviews" class="reviews-list">
+      <div *ngFor="let review of reviews" class="review-card">
+        <div class="review-header">
+          <div class="review-user">
+            <strong>{{ review.user?.name || 'Anonymous' }}</strong>
+            <span class="review-date">{{ review.createdAt | date:'medium' }}</span>
+          </div>
+          <div class="review-average" *ngIf="review.rate">
+            <span class="avg-rating">{{ getAverageRating(review).toFixed(1) }}/10</span>
+          </div>
+        </div>
+
+        <div class="review-event-info">
+          <p><strong>Event:</strong> {{ review.event?.name }}</p>
+          <p class="event-count"><em>This event has occurred {{ review.eventCount }} time(s)</em></p>
+        </div>
+
+        <div *ngIf="review.rate" class="review-ratings">
+          <div *ngIf="review.rate.performance" class="rating-item">
+            <span class="rating-label">Performance:</span>
+            <span class="rating-value">{{ review.rate.performance }}/10</span>
+          </div>
+          <div *ngIf="review.rate.soundAndLightning" class="rating-item">
+            <span class="rating-label">Sound & Lightning:</span>
+            <span class="rating-value">{{ review.rate.soundAndLightning }}/10</span>
+          </div>
+          <div *ngIf="review.rate.venue" class="rating-item">
+            <span class="rating-label">Venue:</span>
+            <span class="rating-value">{{ review.rate.venue }}/10</span>
+          </div>
+          <div *ngIf="review.rate.overallImpression" class="rating-item">
+            <span class="rating-label">Overall:</span>
+            <span class="rating-value">{{ review.rate.overallImpression }}/10</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noReviews>
+      <p class="no-reviews">No reviews yet. Be the first to leave a review!</p>
+    </ng-template>
+  </div>
+
   <!-- Events Section -->
   <div class="events-section">
     <div class="events-header">

@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LocationService } from '../../services/location.service';
 import { EventService } from '../../services/event.service';
+import { ReviewService } from '../../services/review.service';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,10 +18,13 @@ import { Subscription } from 'rxjs';
 export class LocationDetailsComponent implements OnInit, OnDestroy {
   location: any;
   events: any[] = [];
+  reviews: any[] = [];
+  eligibleEvents: any[] = [];
   isAdmin: boolean = false;
   isManager: boolean = false;
   isLoggedIn: boolean = false;
   showEventForm: boolean = false;
+  showReviewForm: boolean = false;
   editingEvent: any = null;
   
   eventForm = {
@@ -33,6 +37,15 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
     imagePath: ''
   };
 
+  reviewForm = {
+    eventName: '',
+    commentText: '',
+    performance: null as number | null,
+    soundAndLightning: null as number | null,
+    venue: null as number | null,
+    overallImpression: null as number | null
+  };
+
   private adminSubscription!: Subscription;
   private loginSubscription!: Subscription;
 
@@ -41,6 +54,7 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
     private router: Router,
     private locationService: LocationService,
     private eventService: EventService,
+    private reviewService: ReviewService,
     private authService: AuthService
   ) { }
 
@@ -57,7 +71,11 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
     if (name) {
       this.loadLocation(name);
       this.loadEvents(name);
+      this.loadReviews(name);
       this.checkIfManager(name);
+      if (this.isLoggedIn) {
+        this.loadEligibleEvents(name);
+      }
     }
   }
 
@@ -71,6 +89,20 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
   loadEvents(locationName: string): void {
     this.eventService.getEventsByLocation(locationName).subscribe({
       next: (data) => this.events = data,
+      error: (err) => console.error(err)
+    });
+  }
+
+  loadReviews(locationName: string): void {
+    this.reviewService.getReviewsByLocation(locationName).subscribe({
+      next: (data) => this.reviews = data,
+      error: (err) => console.error(err)
+    });
+  }
+
+  loadEligibleEvents(locationName: string): void {
+    this.reviewService.getEligibleEvents(locationName).subscribe({
+      next: (data) => this.eligibleEvents = data,
       error: (err) => console.error(err)
     });
   }
@@ -226,5 +258,89 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
         error: (err) => console.error('Error uploading image:', err)
       });
     }
+  }
+
+  // Review management methods
+  openReviewForm(): void {
+    if (!this.isLoggedIn) {
+      alert('Please log in to leave a review');
+      return;
+    }
+    if (!this.location) return;
+    
+    this.loadEligibleEvents(this.location.location.name);
+    this.showReviewForm = true;
+    this.resetReviewForm();
+  }
+
+  resetReviewForm(): void {
+    this.reviewForm = {
+      eventName: '',
+      commentText: '',
+      performance: null,
+      soundAndLightning: null,
+      venue: null,
+      overallImpression: null
+    };
+  }
+
+  cancelReviewForm(): void {
+    this.showReviewForm = false;
+    this.resetReviewForm();
+  }
+
+  saveReview(): void {
+    if (!this.location || !this.reviewForm.eventName) {
+      alert('Please select an event');
+      return;
+    }
+
+    // Check if at least one rating is provided
+    const hasRating = this.reviewForm.performance !== null || 
+                      this.reviewForm.soundAndLightning !== null ||
+                      this.reviewForm.venue !== null || 
+                      this.reviewForm.overallImpression !== null;
+
+    if (!hasRating && !this.reviewForm.commentText) {
+      alert('Please provide at least one rating or a comment');
+      return;
+    }
+
+    const reviewData = {
+      locationName: this.location.location.name,
+      eventName: this.reviewForm.eventName,
+      commentText: this.reviewForm.commentText,
+      performance: this.reviewForm.performance,
+      soundAndLightning: this.reviewForm.soundAndLightning,
+      venue: this.reviewForm.venue,
+      overallImpression: this.reviewForm.overallImpression
+    };
+
+    this.reviewService.createReview(reviewData).subscribe({
+      next: () => {
+        this.loadReviews(this.location.location.name);
+        this.cancelReviewForm();
+        alert('Review submitted successfully!');
+      },
+      error: (err) => {
+        console.error('Error creating review:', err);
+        alert('Failed to submit review: ' + (err.error || 'Unknown error'));
+      }
+    });
+  }
+
+  getAverageRating(review: any): number {
+    if (!review.rate) return 0;
+    
+    const ratings = [
+      review.rate.performance,
+      review.rate.soundAndLightning,
+      review.rate.venue,
+      review.rate.overallImpression
+    ].filter(r => r !== null && r !== undefined);
+
+    if (ratings.length === 0) return 0;
+    const sum = ratings.reduce((a, b) => a + b, 0);
+    return sum / ratings.length;
   }
 }
