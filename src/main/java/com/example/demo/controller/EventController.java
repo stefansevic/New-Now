@@ -113,5 +113,15 @@ public class EventController {
         if (event == null) return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(event);
     }
+
+    // Get all upcoming events (public)
+    @GetMapping
+    public ResponseEntity<List<Event>> getAllUpcomingEvents() {
+        List<Event> upcomingEvents = eventRepository.findAll().stream()
+            .filter(e -> e.getDate() != null && !e.getDate().isBefore(LocalDate.now()))
+            .sorted((e1, e2) -> e1.getDate().compareTo(e2.getDate()))
+            .toList();
+        return ResponseEntity.ok(upcomingEvents);
+    }
 }
 

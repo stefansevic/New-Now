@@ -1,6 +1,7 @@
 <nav>
   <ul>
     <li><a [routerLink]="homeRoute">Home</a></li>
+    <li><a routerLink="/events">Events</a></li>
     <li><a routerLink="/locations">Locations</a></li>
     <li *ngIf="isLoggedIn && isManager"><a routerLink="/my-locations">My Locations</a></li>
     <li *ngIf="!isLoggedIn"><a routerLink="/login">Login</a></li>

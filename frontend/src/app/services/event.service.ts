@@ -30,5 +30,9 @@ export class EventService {
   getEvent(name: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${name}`);
   }
+
+  getAllUpcomingEvents(): Observable<any[]> {
+    return this.http.get<any[]>(this.baseUrl);
+  }
 }
 

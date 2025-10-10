@@ -5,6 +5,7 @@ import { LocationDetailsComponent } from './components/location-details/location
 import { LocationFormComponent } from './components/location-form/location-form';
 import { LocationManagersComponent } from './components/location-managers/location-managers';
 import { MyLocationsComponent } from './components/my-locations/my-locations';
+import { EventsComponent } from './components/events/events';
 import { LoginComponent } from './components/login/login';
 import { RegisterComponent } from './components/register/register';
 import { AccountRequestsComponent } from './components/account-requests/account-requests';
@@ -18,6 +19,7 @@ export const routes: Routes = [
   { path: 'admin/requests', component: AccountRequestsComponent },
   { path: 'admin/home', component: AdminHomeComponent },
   { path: 'requests', component: AccountRequestsComponent },
+  { path: 'events', component: EventsComponent },
   { path: 'locations', component: LocationsComponent },
   { path: 'locations/new', component: LocationFormComponent },
   { path: 'locations/edit/:name', component: LocationFormComponent },
