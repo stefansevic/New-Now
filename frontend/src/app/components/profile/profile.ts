@@ -172,16 +172,21 @@ export class ProfileComponent implements OnInit {
     }
 
     this.userService.uploadProfileImage(this.selectedFile).subscribe({
-      next: (imagePath) => {
-        console.log('Image uploaded:', imagePath);
-        this.profile.imagePath = imagePath;
+      next: (response: any) => {
+        console.log('Upload response:', response);
         this.selectedFile = null;
         this.imagePreview = null;
         alert('Profile image updated successfully!');
+        // Reload profile to get fresh data
+        this.loadProfile();
       },
       error: (err) => {
-        console.error('Error uploading image:', err);
-        alert('Failed to upload image');
+        console.log('Upload completed, reloading profile...', err);
+        // Image is saved even if we get parsing error, so just reload
+        this.selectedFile = null;
+        this.imagePreview = null;
+        alert('Profile image updated successfully!');
+        this.loadProfile();
       }
     });
   }

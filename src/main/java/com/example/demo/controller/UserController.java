@@ -31,6 +31,8 @@ record UpdateProfileRequest(
     String city
 ) {}
 
+record ImageUploadResponse(String imagePath, String message) {}
+
 record UserProfileResponse(
     String email,
     String name,
@@ -174,7 +176,11 @@ public class UserController {
         @RequestParam("file") MultipartFile file
     ) {
         if (principal == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("File is empty");
         }
 
         String email = principal.getUsername();
@@ -192,6 +198,10 @@ public class UserController {
 
             // Generate unique filename
             String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || !originalFilename.contains(".")) {
+                return ResponseEntity.badRequest().body("Invalid file name");
+            }
+            
             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String filename = UUID.randomUUID().toString() + extension;
             Path filePath = uploadDir.resolve(filename);
@@ -204,8 +214,10 @@ public class UserController {
             user.setImagePath(imagePath);
             userRepository.save(user);
 
-            return ResponseEntity.ok(imagePath);
+            System.out.println("Image uploaded successfully: " + imagePath);
+            return ResponseEntity.ok().body(new ImageUploadResponse(imagePath, "Image uploaded successfully"));
         } catch (IOException e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Failed to upload image: " + e.getMessage());
         }
     }
