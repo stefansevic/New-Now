@@ -19,6 +19,7 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
   location: any;
   events: any[] = [];
   reviews: any[] = [];
+  reviewsWithCommentTrees: any[] = [];
   eligibleEvents: any[] = [];
   isAdmin: boolean = false;
   isManager: boolean = false;
@@ -26,6 +27,10 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
   showEventForm: boolean = false;
   showReviewForm: boolean = false;
   editingEvent: any = null;
+  
+  // Comment state
+  replyingToComment: { [key: string]: boolean } = {};
+  replyText: { [key: string]: string } = {};
   
   eventForm = {
     name: '',
@@ -104,6 +109,12 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
           return !r.review?.deleted && !r.review?.hidden;
         });
         console.log('Reviews loaded:', this.reviews);
+
+        // Build comment trees for each review ONCE
+        this.reviewsWithCommentTrees = this.reviews.map(review => ({
+          ...review,
+          commentTree: this.buildCommentTree(review.comments || [])
+        }));
       },
       error: (err) => console.error(err)
     });
@@ -425,5 +436,76 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  // Comment management
+  canReplyToComment(comment: any, review: any): boolean {
+    if (!this.isLoggedIn) return false;
+    
+    // Manager can reply to any comment
+    if (this.isManager) return true;
+    
+    // Regular user can only reply to manager's comments
+    // Check if comment author is a manager (this would need backend support)
+    // For now, we'll allow replies if it's a top-level comment from the review
+    return comment.parent === null;
+  }
+
+  startReply(commentId: string): void {
+    this.replyingToComment[commentId] = true;
+    this.replyText[commentId] = '';
+  }
+
+  cancelReply(commentId: string): void {
+    this.replyingToComment[commentId] = false;
+    this.replyText[commentId] = '';
+  }
+
+  submitReply(reviewCreatedAt: string, parentCommentCreatedAt: string): void {
+    const text = this.replyText[parentCommentCreatedAt];
+    if (!text || text.trim() === '') {
+      alert('Please enter a comment');
+      return;
+    }
+
+    this.reviewService.addComment(reviewCreatedAt, text, parentCommentCreatedAt).subscribe({
+      next: () => {
+        console.log('Reply added');
+        this.loadReviews(this.location.location.name);
+        this.cancelReply(parentCommentCreatedAt);
+      },
+      error: (err) => {
+        console.error('Error adding reply:', err);
+        alert('Failed to add reply: ' + (err.error || 'Unknown error'));
+      }
+    });
+  }
+
+  // Build hierarchical comment tree
+  buildCommentTree(comments: any[]): any[] {
+    const commentMap = new Map();
+    const roots: any[] = [];
+
+    // First pass: create all comment objects
+    comments.forEach(comment => {
+      commentMap.set(comment.createdAt, { ...comment, replies: [] });
+    });
+
+    // Second pass: build tree structure
+    comments.forEach(comment => {
+      const node = commentMap.get(comment.createdAt);
+      if (comment.parent) {
+        const parentNode = commentMap.get(comment.parent.createdAt);
+        if (parentNode) {
+          parentNode.replies.push(node);
+        } else {
+          roots.push(node);
+        }
+      } else {
+        roots.push(node);
+      }
+    });
+
+    return roots;
   }
 }

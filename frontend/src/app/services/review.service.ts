@@ -34,5 +34,12 @@ export class ReviewService {
   deleteReview(createdAt: string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/${createdAt}`);
   }
+
+  addComment(reviewCreatedAt: string, text: string, parentCommentCreatedAt?: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/${reviewCreatedAt}/comments`, {
+      text,
+      parentCommentCreatedAt: parentCommentCreatedAt || null
+    });
+  }
 }
 
