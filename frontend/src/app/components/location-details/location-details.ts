@@ -321,6 +321,21 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Validate ratings are between 1-10
+    const ratings = [
+      { name: 'Performance', value: this.reviewForm.performance },
+      { name: 'Sound & Lightning', value: this.reviewForm.soundAndLightning },
+      { name: 'Venue', value: this.reviewForm.venue },
+      { name: 'Overall Impression', value: this.reviewForm.overallImpression }
+    ];
+
+    for (const rating of ratings) {
+      if (rating.value !== null && (rating.value < 1 || rating.value > 10)) {
+        alert(`${rating.name} rating must be between 1 and 10`);
+        return;
+      }
+    }
+
     // Check if at least one rating is provided
     const hasRating = this.reviewForm.performance !== null || 
                       this.reviewForm.soundAndLightning !== null ||

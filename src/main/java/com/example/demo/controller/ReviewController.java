@@ -102,6 +102,20 @@ public class ReviewController {
         User user = userRepository.findById(principal.getUsername()).orElse(null);
         if (user == null) return ResponseEntity.status(401).build();
 
+        // Validate ratings are between 1-10
+        if (req.performance() != null && (req.performance() < 1 || req.performance() > 10)) {
+            return ResponseEntity.badRequest().body("Performance rating must be between 1 and 10");
+        }
+        if (req.soundAndLightning() != null && (req.soundAndLightning() < 1 || req.soundAndLightning() > 10)) {
+            return ResponseEntity.badRequest().body("Sound & Lightning rating must be between 1 and 10");
+        }
+        if (req.venue() != null && (req.venue() < 1 || req.venue() > 10)) {
+            return ResponseEntity.badRequest().body("Venue rating must be between 1 and 10");
+        }
+        if (req.overallImpression() != null && (req.overallImpression() < 1 || req.overallImpression() > 10)) {
+            return ResponseEntity.badRequest().body("Overall impression rating must be between 1 and 10");
+        }
+
         // Create Rate if at least one rating is provided
         Rate rate = null;
         if (req.performance() != null || req.soundAndLightning() != null || 

@@ -341,9 +341,16 @@
 
 .ratings-section h5 {
   margin-top: 0;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
   color: #555;
   font-size: 16px;
+}
+
+.rating-info {
+  margin: 0 0 15px 0;
+  color: #666;
+  font-size: 13px;
+  font-style: italic;
 }
 
 .rating-group {
