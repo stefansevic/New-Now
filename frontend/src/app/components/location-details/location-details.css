@@ -457,3 +457,28 @@
   padding: 30px;
   font-style: italic;
 }
+
+.review-comment {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.comment-text {
+  background: #f8f9fa;
+  padding: 12px 15px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.comment-text p {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.comment-text strong {
+  color: #555;
+  margin-right: 5px;
+}

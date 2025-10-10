@@ -73,9 +73,6 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
       this.loadEvents(name);
       this.loadReviews(name);
       this.checkIfManager(name);
-      if (this.isLoggedIn) {
-        this.loadEligibleEvents(name);
-      }
     }
   }
 
@@ -102,8 +99,14 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
 
   loadEligibleEvents(locationName: string): void {
     this.reviewService.getEligibleEvents(locationName).subscribe({
-      next: (data) => this.eligibleEvents = data,
-      error: (err) => console.error(err)
+      next: (data) => {
+        console.log('Eligible events loaded:', data);
+        this.eligibleEvents = data;
+      },
+      error: (err) => {
+        console.error('Error loading eligible events:', err);
+        this.eligibleEvents = [];
+      }
     });
   }
 
@@ -268,9 +271,9 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
     }
     if (!this.location) return;
     
-    this.loadEligibleEvents(this.location.location.name);
     this.showReviewForm = true;
     this.resetReviewForm();
+    this.loadEligibleEvents(this.location.location.name);
   }
 
   resetReviewForm(): void {

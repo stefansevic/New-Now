@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
+import com.example.demo.service.ReviewService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +22,8 @@ record CreateReviewRequest(
     Integer venue,
     Integer overallImpression
 ) {}
+
+record ReviewWithComments(Review review, List<Comment> comments) {}
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -124,12 +127,21 @@ public class ReviewController {
     }
 
     @GetMapping("/location/{locationName}")
-    public ResponseEntity<List<Review>> getReviewsByLocation(@PathVariable String locationName) {
+    public ResponseEntity<?> getReviewsByLocation(@PathVariable String locationName) {
         Location location = locationRepository.findById(locationName).orElse(null);
         if (location == null) return ResponseEntity.badRequest().build();
 
         List<Review> reviews = reviewRepository.findByLocation(location);
-        return ResponseEntity.ok(reviews);
+        
+        // Get comments for each review
+        var reviewsWithComments = reviews.stream()
+            .map(review -> {
+                List<Comment> comments = commentRepository.findByReview(review);
+                return new ReviewWithComments(review, comments);
+            })
+            .toList();
+        
+        return ResponseEntity.ok(reviewsWithComments);
     }
 
     // Get eligible events for review (recurrent and past events)
@@ -140,10 +152,24 @@ public class ReviewController {
 
         // Get all events for this location
         List<Event> allEvents = eventRepository.findAll().stream()
-            .filter(e -> e.getLocation().getName().equals(locationName))
+            .filter(e -> e.getLocation() != null && e.getLocation().getName().equals(locationName))
             .filter(e -> e.getRecurrent() != null && e.getRecurrent()) // Must be recurrent
             .filter(e -> e.getDate() != null && e.getDate().isBefore(LocalDate.now())) // Must be in the past
             .toList();
+
+        System.out.println("=== ELIGIBLE EVENTS DEBUG ===");
+        System.out.println("Location: " + locationName);
+        System.out.println("Total events in DB: " + eventRepository.count());
+        System.out.println("Events for this location: " + eventRepository.findAll().stream()
+            .filter(e -> e.getLocation() != null && e.getLocation().getName().equals(locationName))
+            .count());
+        System.out.println("Recurrent events: " + eventRepository.findAll().stream()
+            .filter(e -> e.getLocation() != null && e.getLocation().getName().equals(locationName))
+            .filter(e -> e.getRecurrent() != null && e.getRecurrent())
+            .count());
+        System.out.println("Past recurrent events: " + allEvents.size());
+        allEvents.forEach(e -> System.out.println("  - " + e.getName() + " (date: " + e.getDate() + ", recurrent: " + e.getRecurrent() + ")"));
+        System.out.println("=== END DEBUG ===");
 
         return ResponseEntity.ok(allEvents);
     }

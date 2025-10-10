@@ -116,35 +116,42 @@
       <div *ngFor="let review of reviews" class="review-card">
         <div class="review-header">
           <div class="review-user">
-            <strong>{{ review.user?.name || 'Anonymous' }}</strong>
-            <span class="review-date">{{ review.createdAt | date:'medium' }}</span>
+            <strong>{{ review.review?.user?.name || 'Anonymous' }}</strong>
+            <span class="review-date">{{ review.review?.createdAt | date:'medium' }}</span>
           </div>
-          <div class="review-average" *ngIf="review.rate">
-            <span class="avg-rating">{{ getAverageRating(review).toFixed(1) }}/10</span>
+          <div class="review-average" *ngIf="review.review?.rate">
+            <span class="avg-rating">{{ getAverageRating(review.review).toFixed(1) }}/10</span>
           </div>
         </div>
 
         <div class="review-event-info">
-          <p><strong>Event:</strong> {{ review.event?.name }}</p>
-          <p class="event-count"><em>This event has occurred {{ review.eventCount }} time(s)</em></p>
+          <p><strong>Event:</strong> {{ review.review?.event?.name }}</p>
+          <p class="event-count"><em>This event has occurred {{ review.review?.eventCount }} time(s)</em></p>
         </div>
 
-        <div *ngIf="review.rate" class="review-ratings">
-          <div *ngIf="review.rate.performance" class="rating-item">
+        <div *ngIf="review.review?.rate" class="review-ratings">
+          <div *ngIf="review.review.rate.performance" class="rating-item">
             <span class="rating-label">Performance:</span>
-            <span class="rating-value">{{ review.rate.performance }}/10</span>
+            <span class="rating-value">{{ review.review.rate.performance }}/10</span>
           </div>
-          <div *ngIf="review.rate.soundAndLightning" class="rating-item">
+          <div *ngIf="review.review.rate.soundAndLightning" class="rating-item">
             <span class="rating-label">Sound & Lightning:</span>
-            <span class="rating-value">{{ review.rate.soundAndLightning }}/10</span>
+            <span class="rating-value">{{ review.review.rate.soundAndLightning }}/10</span>
           </div>
-          <div *ngIf="review.rate.venue" class="rating-item">
+          <div *ngIf="review.review.rate.venue" class="rating-item">
             <span class="rating-label">Venue:</span>
-            <span class="rating-value">{{ review.rate.venue }}/10</span>
+            <span class="rating-value">{{ review.review.rate.venue }}/10</span>
           </div>
-          <div *ngIf="review.rate.overallImpression" class="rating-item">
+          <div *ngIf="review.review.rate.overallImpression" class="rating-item">
             <span class="rating-label">Overall:</span>
-            <span class="rating-value">{{ review.rate.overallImpression }}/10</span>
+            <span class="rating-value">{{ review.review.rate.overallImpression }}/10</span>
+          </div>
+        </div>
+
+        <!-- Comment Section -->
+        <div *ngIf="review.comments && review.comments.length > 0" class="review-comment">
+          <div *ngFor="let comment of review.comments" class="comment-text">
+            <p><strong>Comment:</strong> {{ comment.text }}</p>
           </div>
         </div>
       </div>
