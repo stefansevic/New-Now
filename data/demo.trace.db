@@ -1,0 +1,19 @@
+2025-10-10 17:31:43.656688+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "-- Cleanup script - Delete all data except admin user\000d\000a-- Run this SQL script in your MySQL database\000d\000a\000d\000a-- Disable foreign key checks temporarily\000d\000aSET [*]FOREIGN_KEY_CHECKS = 0"; expected "@, AUTOCOMMIT, EXCLUSIVE, IGNORECASE, PASSWORD, SALT, MODE, DATABASE, COLLATION, CLUSTER, DATABASE_EVENT_LISTENER, ALLOW_LITERALS, DEFAULT_TABLE_TYPE, SCHEMA, CATALOG, SCHEMA_SEARCH_PATH, JAVA_OBJECT_SERIALIZER, IGNORE_CATALOGS, SESSION, TRANSACTION, TIME, NON_KEYWORDS, DEFAULT_NULL_ORDERING"; SQL statement:
+-- Cleanup script - Delete all data except admin user
+-- Run this SQL script in your MySQL database
+
+-- Disable foreign key checks temporarily
+SET FOREIGN_KEY_CHECKS = 0 [42001-224]
+2025-10-10 17:31:43.667690+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "LOCATION_IMAGE" not found; SQL statement:
+-- Delete all location images
+DELETE FROM location_image [42102-224]
+2025-10-10 17:31:43.670692+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "-- Re-enable foreign key checks\000d\000aSET [*]FOREIGN_KEY_CHECKS = 1"; expected "@, AUTOCOMMIT, EXCLUSIVE, IGNORECASE, PASSWORD, SALT, MODE, DATABASE, COLLATION, CLUSTER, DATABASE_EVENT_LISTENER, ALLOW_LITERALS, DEFAULT_TABLE_TYPE, SCHEMA, CATALOG, SCHEMA_SEARCH_PATH, JAVA_OBJECT_SERIALIZER, IGNORE_CATALOGS, SESSION, TRANSACTION, TIME, NON_KEYWORDS, DEFAULT_NULL_ORDERING"; SQL statement:
+-- Re-enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1 [42001-224]
+2025-10-10 17:32:47.898600+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "LOCATION_IMAGE" not found; SQL statement:
+-- 6. Delete all location images (depends on location)
+DELETE FROM LOCATION_IMAGE [42102-224]
