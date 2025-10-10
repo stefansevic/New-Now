@@ -22,6 +22,8 @@ record CreateReviewRequest(
     Integer overallImpression
 ) {}
 
+record CreateCommentRequest(String text, String parentCommentCreatedAt) {}
+
 record ReviewWithComments(Review review, List<Comment> comments) {}
 
 @RestController
@@ -271,6 +273,66 @@ public class ReviewController {
         review.setDeleted(true);
         reviewRepository.save(review);
         return ResponseEntity.ok().build();
+    }
+
+    // Add comment to review (reply)
+    @PostMapping("/{reviewCreatedAt}/comments")
+    @Transactional
+    public ResponseEntity<?> addComment(@AuthenticationPrincipal UserDetails principal,
+                                       @PathVariable String reviewCreatedAt,
+                                       @RequestBody CreateCommentRequest req) {
+        if (principal == null) return ResponseEntity.status(401).build();
+        
+        LocalDateTime reviewTime = LocalDateTime.parse(reviewCreatedAt);
+        Review review = reviewRepository.findById(reviewTime).orElse(null);
+        if (review == null) return ResponseEntity.badRequest().body("Review not found");
+
+        String email = principal.getUsername();
+        User user = userRepository.findById(email).orElse(null);
+        if (user == null) return ResponseEntity.status(401).build();
+
+        // Check if user is manager of this location
+        boolean isManager = !managesRepository
+            .findByUserEmailAndLocationName(email, review.getLocation().getName())
+            .isEmpty();
+
+        // Find parent comment if specified
+        Comment parentComment = null;
+        if (req.parentCommentCreatedAt() != null && !req.parentCommentCreatedAt().isEmpty()) {
+            LocalDateTime parentTime = LocalDateTime.parse(req.parentCommentCreatedAt());
+            parentComment = commentRepository.findById(parentTime).orElse(null);
+            if (parentComment == null) {
+                return ResponseEntity.badRequest().body("Parent comment not found");
+            }
+
+            // Validation: If parent exists, check reply permissions
+            // Manager can always reply to user comments
+            // User can only reply to manager's comments (parent.user must be manager)
+            if (!isManager) {
+                // Regular user trying to reply - parent must be from a manager
+                boolean parentIsFromManager = !managesRepository
+                    .findByUserEmailAndLocationName(
+                        parentComment.getUser().getEmail(), 
+                        review.getLocation().getName()
+                    ).isEmpty();
+                
+                if (!parentIsFromManager) {
+                    return ResponseEntity.status(403)
+                        .body("Regular users can only reply to manager comments");
+                }
+            }
+        }
+
+        // Create comment
+        Comment comment = new Comment();
+        comment.setCreatedAt(LocalDateTime.now());
+        comment.setText(req.text());
+        comment.setUser(user);
+        comment.setReview(review);
+        comment.setParent(parentComment);
+        
+        commentRepository.save(comment);
+        return ResponseEntity.ok(comment);
     }
 }
 
