@@ -489,3 +489,95 @@
   color: #555;
   margin-right: 5px;
 }
+
+/* Review status indicators */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 10px;
+}
+
+.badge-deleted {
+  background: #dc3545;
+  color: white;
+}
+
+.badge-hidden {
+  background: #ffc107;
+  color: #333;
+}
+
+.deleted-review {
+  opacity: 0.6;
+  border: 2px solid #dc3545;
+}
+
+.hidden-review {
+  border: 2px solid #ffc107;
+}
+
+/* Manager action buttons */
+.review-actions {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-hide {
+  background: #ffc107;
+  color: #333;
+}
+
+.btn-hide:hover {
+  background: #e0a800;
+}
+
+.btn-unhide {
+  background: #28a745;
+  color: white;
+}
+
+.btn-unhide:hover {
+  background: #218838;
+}
+
+.btn-delete-review {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-delete-review:hover {
+  background: #c82333;
+}
+
+.deleted-info {
+  margin-top: 15px;
+  padding: 12px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+}
+
+.deleted-info p {
+  margin: 0;
+  color: #856404;
+  font-size: 14px;
+  font-weight: 500;
+}

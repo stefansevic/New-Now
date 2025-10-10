@@ -113,11 +113,14 @@
 
     <!-- Reviews List -->
     <div *ngIf="reviews && reviews.length > 0; else noReviews" class="reviews-list">
-      <div *ngFor="let review of reviews" class="review-card">
+      <div *ngFor="let review of reviews" class="review-card" [class.deleted-review]="review.review?.deleted" [class.hidden-review]="review.review?.hidden">
         <div class="review-header">
           <div class="review-user">
             <strong>{{ review.review?.user?.name || 'Anonymous' }}</strong>
             <span class="review-date">{{ review.review?.createdAt | date:'medium' }}</span>
+            <!-- Status badges for managers -->
+            <span *ngIf="isManager && review.review?.deleted" class="status-badge badge-deleted">Deleted</span>
+            <span *ngIf="isManager && review.review?.hidden && !review.review?.deleted" class="status-badge badge-hidden">Hidden</span>
           </div>
           <div class="review-average" *ngIf="review.review?.rate">
             <span class="avg-rating">{{ getAverageRating(review.review).toFixed(1) }}/10</span>
@@ -153,6 +156,29 @@
           <div *ngFor="let comment of review.comments" class="comment-text">
             <p><strong>Comment:</strong> {{ comment.text }}</p>
           </div>
+        </div>
+
+        <!-- Manager Actions -->
+        <div *ngIf="isManager && !review.review?.deleted" class="review-actions">
+          <button *ngIf="!review.review?.hidden" 
+                  (click)="hideReview(review.review.createdAt)" 
+                  class="btn-action btn-hide">
+            Hide Review
+          </button>
+          <button *ngIf="review.review?.hidden" 
+                  (click)="unhideReview(review.review.createdAt)" 
+                  class="btn-action btn-unhide">
+            Unhide Review
+          </button>
+          <button (click)="deleteReviewPermanently(review.review.createdAt)" 
+                  class="btn-action btn-delete-review">
+            Delete Review
+          </button>
+        </div>
+
+        <!-- Deleted Review Info (manager only) -->
+        <div *ngIf="isManager && review.review?.deleted" class="deleted-info">
+          <p>⚠️ This review has been permanently deleted. Ratings are not counted in location average.</p>
         </div>
       </div>
     </div>

@@ -56,6 +56,12 @@ public class LocationService {
 		double sum = 0.0;
 		int count = 0;
 		for (Review r : reviews) {
+			// Skip deleted reviews - their ratings don't count
+			// Hidden reviews still count in the average
+			if (r.getDeleted() != null && r.getDeleted()) {
+				continue;
+			}
+			
 			Rate rate = r.getRate();
 			if (rate == null) continue;
 			List<Integer> values = new ArrayList<>();
