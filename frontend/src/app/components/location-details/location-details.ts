@@ -71,8 +71,9 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
     if (name) {
       this.loadLocation(name);
       this.loadEvents(name);
-      this.loadReviews(name);
       this.checkIfManager(name);
+      // Load reviews after checking manager status
+      setTimeout(() => this.loadReviews(name), 100);
     }
   }
 
@@ -92,7 +93,19 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
 
   loadReviews(locationName: string): void {
     this.reviewService.getReviewsByLocation(locationName).subscribe({
-      next: (data) => this.reviews = data,
+      next: (data) => {
+        // Filter out deleted reviews for non-managers
+        // Managers see all reviews, regular users don't see deleted ones
+        this.reviews = data.filter(r => {
+          // If user is manager of this location, show all (including deleted/hidden)
+          if (this.isManager) {
+            return true;
+          }
+          // Regular users don't see deleted reviews
+          return !r.review?.deleted;
+        });
+        console.log('Reviews loaded:', this.reviews);
+      },
       error: (err) => console.error(err)
     });
   }
@@ -356,5 +369,47 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
     if (ratings.length === 0) return 0;
     const sum = ratings.reduce((a, b) => a + b, 0);
     return sum / ratings.length;
+  }
+
+  // Manager review actions
+  hideReview(createdAt: string): void {
+    this.reviewService.hideReview(createdAt).subscribe({
+      next: () => {
+        console.log('Review hidden');
+        this.loadReviews(this.location.location.name);
+      },
+      error: (err) => {
+        console.error('Error hiding review:', err);
+        alert('Failed to hide review');
+      }
+    });
+  }
+
+  unhideReview(createdAt: string): void {
+    this.reviewService.unhideReview(createdAt).subscribe({
+      next: () => {
+        console.log('Review unhidden');
+        this.loadReviews(this.location.location.name);
+      },
+      error: (err) => {
+        console.error('Error unhiding review:', err);
+        alert('Failed to unhide review');
+      }
+    });
+  }
+
+  deleteReviewPermanently(createdAt: string): void {
+    if (confirm('Are you sure you want to permanently delete this review? This action cannot be undone.')) {
+      this.reviewService.deleteReview(createdAt).subscribe({
+        next: () => {
+          console.log('Review deleted');
+          this.loadReviews(this.location.location.name);
+        },
+        error: (err) => {
+          console.error('Error deleting review:', err);
+          alert('Failed to delete review');
+        }
+      });
+    }
   }
 }

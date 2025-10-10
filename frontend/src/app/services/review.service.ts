@@ -22,5 +22,17 @@ export class ReviewService {
   getEligibleEvents(locationName: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/location/${locationName}/eligible-events`);
   }
+
+  hideReview(createdAt: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${createdAt}/hide`, {});
+  }
+
+  unhideReview(createdAt: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${createdAt}/unhide`, {});
+  }
+
+  deleteReview(createdAt: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${createdAt}`);
+  }
 }
 
