@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### H2 Database ###
+data/
+*.trace.db
+
+### Uploads ###
+uploads/
