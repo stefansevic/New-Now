@@ -44,7 +44,7 @@ public class AccountRequestService {
 		return accountRequestRepository.findAll();
 	}
 
-	public AccountRequest approve(String email, String name) {
+	public AccountRequest approve(String email) {
 		AccountRequest req = accountRequestRepository.findById(email).orElseThrow();
 		if (req.getStatus() != RequestStatus.PENDING) {
 			throw new IllegalStateException("Only PENDING requests can be approved");
@@ -52,11 +52,17 @@ public class AccountRequestService {
 		req.setStatus(RequestStatus.ACCEPTED);
 		req.setRejectionReason(null);
 		accountRequestRepository.save(req);
+		
+		// Create User with all data from AccountRequest
 		User user = new User();
 		user.setEmail(req.getEmail());
-        user.setPassword(passwordEncoder.encode(req.getPassword()));
-		user.setName(name);
+		user.setPassword(passwordEncoder.encode(req.getPassword()));
+		user.setName(req.getName());
+		user.setPhoneNumber(req.getPhoneNumber());
+		user.setBirthday(req.getBirthday());
 		user.setAddress(req.getAddress());
+		user.setCity(req.getCity());
+		user.setCreatedAt(LocalDate.now());
 		userRepository.save(user);
 		return req;
 	}
