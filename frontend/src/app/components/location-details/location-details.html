@@ -48,7 +48,7 @@
   <div class="reviews-section">
     <div class="reviews-header">
       <h3>Reviews</h3>
-      <button *ngIf="isLoggedIn && !showReviewForm" (click)="openReviewForm()" class="btn btn-create">
+      <button *ngIf="isLoggedIn && !isAdmin && !isManager && !showReviewForm" (click)="openReviewForm()" class="btn btn-create">
         Leave a Review
       </button>
     </div>
@@ -130,21 +130,21 @@
         </div>
 
         <div *ngIf="review.review?.rate" class="review-ratings">
-          <div *ngIf="review.review.rate.performance" class="rating-item">
-            <span class="rating-label">Performance:</span>
-            <span class="rating-value">{{ review.review.rate.performance }}/10</span>
+          <div *ngIf="review.review.rate.performance" class="rating-box">
+            <div class="rating-label">Performance:</div>
+            <div class="rating-score">{{ review.review.rate.performance }}/10</div>
           </div>
-          <div *ngIf="review.review.rate.soundAndLightning" class="rating-item">
-            <span class="rating-label">Sound & Lightning:</span>
-            <span class="rating-value">{{ review.review.rate.soundAndLightning }}/10</span>
+          <div *ngIf="review.review.rate.soundAndLightning" class="rating-box">
+            <div class="rating-label">Sound & Lightning:</div>
+            <div class="rating-score">{{ review.review.rate.soundAndLightning }}/10</div>
           </div>
-          <div *ngIf="review.review.rate.venue" class="rating-item">
-            <span class="rating-label">Venue:</span>
-            <span class="rating-value">{{ review.review.rate.venue }}/10</span>
+          <div *ngIf="review.review.rate.venue" class="rating-box">
+            <div class="rating-label">Venue:</div>
+            <div class="rating-score">{{ review.review.rate.venue }}/10</div>
           </div>
-          <div *ngIf="review.review.rate.overallImpression" class="rating-item">
-            <span class="rating-label">Overall:</span>
-            <span class="rating-value">{{ review.review.rate.overallImpression }}/10</span>
+          <div *ngIf="review.review.rate.overallImpression" class="rating-box">
+            <div class="rating-label">Overall:</div>
+            <div class="rating-score">{{ review.review.rate.overallImpression }}/10</div>
           </div>
         </div>
 

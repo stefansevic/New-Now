@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
-import com.example.demo.service.ReviewService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,16 +34,19 @@ public class ReviewController {
     private final UserRepository userRepository;
     private final RateRepository rateRepository;
     private final CommentRepository commentRepository;
+    private final ManagesRepository managesRepository;
 
     public ReviewController(ReviewRepository reviewRepository, LocationRepository locationRepository,
                           EventRepository eventRepository, UserRepository userRepository,
-                          RateRepository rateRepository, CommentRepository commentRepository) {
+                          RateRepository rateRepository, CommentRepository commentRepository,
+                          ManagesRepository managesRepository) {
         this.reviewRepository = reviewRepository;
         this.locationRepository = locationRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.rateRepository = rateRepository;
         this.commentRepository = commentRepository;
+        this.managesRepository = managesRepository;
     }
 
     @PostMapping
@@ -53,9 +55,22 @@ public class ReviewController {
                                          @RequestBody CreateReviewRequest req) {
         if (principal == null) return ResponseEntity.status(401).build();
 
+        String email = principal.getUsername();
+        
+        // Check if user is admin
+        if (email.equals("admin@system.local")) {
+            return ResponseEntity.status(403).body("Administrators cannot leave reviews");
+        }
+
         // Get location
         Location location = locationRepository.findById(req.locationName()).orElse(null);
         if (location == null) return ResponseEntity.badRequest().body("Location not found");
+        
+        // Check if user is manager of this location
+        boolean isManager = !managesRepository.findByUserEmailAndLocationName(email, req.locationName()).isEmpty();
+        if (isManager) {
+            return ResponseEntity.status(403).body("Managers cannot leave reviews on locations they manage");
+        }
 
         // Get event
         Event event = eventRepository.findById(req.eventName()).orElse(null);

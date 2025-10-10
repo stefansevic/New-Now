@@ -269,6 +269,17 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
       alert('Please log in to leave a review');
       return;
     }
+    
+    if (this.isAdmin) {
+      alert('Administrators cannot leave reviews');
+      return;
+    }
+    
+    if (this.isManager) {
+      alert('Managers cannot leave reviews on locations they manage');
+      return;
+    }
+    
     if (!this.location) return;
     
     this.showReviewForm = true;

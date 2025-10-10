@@ -426,29 +426,36 @@
 
 .review-ratings {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px;
-  margin-top: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
 }
 
-.rating-item {
+.rating-box {
   display: flex;
-  justify-content: space-between;
-  padding: 8px 12px;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
   background: #f8f9fa;
-  border-radius: 4px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
 }
 
 .rating-label {
   font-weight: 500;
-  color: #555;
-  font-size: 14px;
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 8px;
+  text-align: center;
 }
 
-.rating-value {
+.rating-score {
+  background: #4CAF50;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
   font-weight: bold;
-  color: #4CAF50;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .no-reviews {
