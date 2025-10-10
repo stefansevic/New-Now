@@ -123,6 +123,7 @@ public class ReviewController {
         review.setEvent(event);
         review.setEventCount(eventCount);
         review.setHidden(false);
+        review.setDeleted(false);
         review.setRate(rate);
 
         review = reviewRepository.save(review);
@@ -187,6 +188,75 @@ public class ReviewController {
         System.out.println("=== END DEBUG ===");
 
         return ResponseEntity.ok(allEvents);
+    }
+
+    // Hide review (manager only)
+    @PutMapping("/{createdAt}/hide")
+    public ResponseEntity<?> hideReview(@AuthenticationPrincipal UserDetails principal, 
+                                       @PathVariable String createdAt) {
+        if (principal == null) return ResponseEntity.status(401).build();
+
+        LocalDateTime reviewTime = LocalDateTime.parse(createdAt);
+        Review review = reviewRepository.findById(reviewTime).orElse(null);
+        if (review == null) return ResponseEntity.badRequest().body("Review not found");
+
+        // Check if user is manager of this location
+        String email = principal.getUsername();
+        boolean isManager = !managesRepository
+            .findByUserEmailAndLocationName(email, review.getLocation().getName())
+            .isEmpty();
+        
+        if (!isManager) return ResponseEntity.status(403).body("Only managers can hide reviews");
+
+        review.setHidden(true);
+        reviewRepository.save(review);
+        return ResponseEntity.ok().build();
+    }
+
+    // Unhide review (manager only)
+    @PutMapping("/{createdAt}/unhide")
+    public ResponseEntity<?> unhideReview(@AuthenticationPrincipal UserDetails principal, 
+                                         @PathVariable String createdAt) {
+        if (principal == null) return ResponseEntity.status(401).build();
+
+        LocalDateTime reviewTime = LocalDateTime.parse(createdAt);
+        Review review = reviewRepository.findById(reviewTime).orElse(null);
+        if (review == null) return ResponseEntity.badRequest().body("Review not found");
+
+        // Check if user is manager of this location
+        String email = principal.getUsername();
+        boolean isManager = !managesRepository
+            .findByUserEmailAndLocationName(email, review.getLocation().getName())
+            .isEmpty();
+        
+        if (!isManager) return ResponseEntity.status(403).body("Only managers can unhide reviews");
+
+        review.setHidden(false);
+        reviewRepository.save(review);
+        return ResponseEntity.ok().build();
+    }
+
+    // Delete review (manager only - logical delete)
+    @DeleteMapping("/{createdAt}")
+    public ResponseEntity<?> deleteReview(@AuthenticationPrincipal UserDetails principal, 
+                                         @PathVariable String createdAt) {
+        if (principal == null) return ResponseEntity.status(401).build();
+
+        LocalDateTime reviewTime = LocalDateTime.parse(createdAt);
+        Review review = reviewRepository.findById(reviewTime).orElse(null);
+        if (review == null) return ResponseEntity.badRequest().body("Review not found");
+
+        // Check if user is manager of this location
+        String email = principal.getUsername();
+        boolean isManager = !managesRepository
+            .findByUserEmailAndLocationName(email, review.getLocation().getName())
+            .isEmpty();
+        
+        if (!isManager) return ResponseEntity.status(403).body("Only managers can delete reviews");
+
+        review.setDeleted(true);
+        reviewRepository.save(review);
+        return ResponseEntity.ok().build();
     }
 }
 

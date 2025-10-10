@@ -12,6 +12,7 @@ public class Review {
 
 	private Integer eventCount;
 	private Boolean hidden;
+	private Boolean deleted;
 
 	@ManyToOne
 	@JoinColumn(name = "user_email")
@@ -86,6 +87,14 @@ public class Review {
 
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public Boolean getDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
 	}
 }
 
