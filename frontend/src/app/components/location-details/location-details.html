@@ -46,16 +46,83 @@
 
   <!-- Events Section -->
   <div class="events-section">
-    <h3>Upcoming Events</h3>
-    <div *ngIf="location.events && location.events.length > 0; else noEvents">
-      <ul>
-        <li *ngFor="let event of location.events">
-          {{ event.name }} - {{ event.date }}
-        </li>
-      </ul>
+    <div class="events-header">
+      <h3>Events</h3>
+      <button *ngIf="isManager && !showEventForm" (click)="openEventForm()" class="btn btn-create">
+        Add Event
+      </button>
     </div>
+
+    <!-- Event Form (Create/Edit) -->
+    <div *ngIf="showEventForm" class="event-form">
+      <h4>{{ editingEvent ? 'Edit Event' : 'Create New Event' }}</h4>
+      <form (ngSubmit)="saveEvent()">
+        <div class="form-group">
+          <label>Event Name:</label>
+          <input type="text" [(ngModel)]="eventForm.name" name="name" required [disabled]="!!editingEvent">
+        </div>
+        
+        <div class="form-group">
+          <label>Address:</label>
+          <input type="text" [(ngModel)]="eventForm.address" name="address" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Type:</label>
+          <input type="text" [(ngModel)]="eventForm.type" name="type" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Date:</label>
+          <input type="date" [(ngModel)]="eventForm.date" name="date" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Price (leave empty for free):</label>
+          <input type="number" [(ngModel)]="eventForm.price" name="price" min="0" step="0.01">
+        </div>
+        
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" [(ngModel)]="eventForm.recurrent" name="recurrent">
+            Recurrent Event
+          </label>
+        </div>
+        
+        <div class="form-group">
+          <label>Event Image:</label>
+          <input type="file" (change)="onImageUpload($event)" accept="image/*">
+          <img *ngIf="eventForm.imagePath" [src]="getImageUrl(eventForm.imagePath)" class="preview-image" alt="Event preview">
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn btn-save">Save</button>
+          <button type="button" (click)="cancelEventForm()" class="btn btn-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Events List -->
+    <div *ngIf="events && events.length > 0; else noEvents" class="events-list">
+      <div *ngFor="let event of events" class="event-card">
+        <img *ngIf="event.imagePath" [src]="getImageUrl(event.imagePath)" class="event-image" alt="{{ event.name }}">
+        <div class="event-details">
+          <h4>{{ event.name }}</h4>
+          <p><strong>Address:</strong> {{ event.address }}</p>
+          <p><strong>Type:</strong> {{ event.type }}</p>
+          <p><strong>Date:</strong> {{ event.date }}</p>
+          <p><strong>Price:</strong> {{ event.price ? (event.price | currency) : 'Free' }}</p>
+          <p *ngIf="event.recurrent"><span class="badge">Recurrent</span></p>
+        </div>
+        <div *ngIf="isManager" class="event-actions">
+          <button (click)="editEvent(event)" class="btn btn-sm btn-edit">Edit</button>
+          <button (click)="deleteEvent(event.name)" class="btn btn-sm btn-delete">Delete</button>
+        </div>
+      </div>
+    </div>
+    
     <ng-template #noEvents>
-      <p>No upcoming events.</p>
+      <p>No events scheduled.</p>
     </ng-template>
   </div>
 

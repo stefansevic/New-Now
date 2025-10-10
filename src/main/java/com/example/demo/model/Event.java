@@ -14,6 +14,7 @@ public class Event {
 	private LocalDate date;
 	private Double price;
 	private Boolean recurrent;
+	private String imagePath;
 
 	@ManyToOne
 	@JoinColumn(name = "location_name")
@@ -76,6 +77,14 @@ public class Event {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getImagePath() {
+		return imagePath;
+	}
+
+	public void setImagePath(String imagePath) {
+		this.imagePath = imagePath;
 	}
 }
 
