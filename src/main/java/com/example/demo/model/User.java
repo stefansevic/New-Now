@@ -19,6 +19,7 @@ public class User {
 	private LocalDate birthday;
 	private String address;
 	private String city;
+	private String imagePath;
 
 	@Id
 	private String email;
@@ -85,6 +86,14 @@ public class User {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getImagePath() {
+		return imagePath;
+	}
+
+	public void setImagePath(String imagePath) {
+		this.imagePath = imagePath;
 	}
 }
 
