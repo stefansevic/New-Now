@@ -1,0 +1,250 @@
+<div class="profile-container">
+  <h1>My Profile</h1>
+
+  <div *ngIf="loading" class="loading">
+    <p>Loading profile...</p>
+  </div>
+
+  <div *ngIf="!loading && profile" class="profile-content">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button (click)="setActiveTab('info')" 
+              [class.active]="activeTab === 'info'" 
+              class="tab-button">
+        Profile Info
+      </button>
+      <button (click)="setActiveTab('reviews')" 
+              [class.active]="activeTab === 'reviews'" 
+              class="tab-button">
+        My Reviews ({{ profile.reviews?.length || 0 }})
+      </button>
+      <button (click)="setActiveTab('managed')" 
+              [class.active]="activeTab === 'managed'" 
+              class="tab-button">
+        Managed Locations ({{ profile.managedLocations?.length || 0 }})
+      </button>
+      <button (click)="setActiveTab('password')" 
+              [class.active]="activeTab === 'password'" 
+              class="tab-button">
+        Change Password
+      </button>
+    </div>
+
+    <!-- Profile Info Tab -->
+    <div *ngIf="activeTab === 'info'" class="tab-content">
+      <div class="profile-info-section">
+        <!-- Profile Image -->
+        <div class="profile-image-section">
+          <div class="profile-image-container">
+            <img *ngIf="imagePreview || profile.imagePath" 
+                 [src]="imagePreview || getImageUrl(profile.imagePath)" 
+                 alt="Profile Image"
+                 class="profile-image">
+            <div *ngIf="!imagePreview && !profile.imagePath" class="no-profile-image">
+              No Image
+            </div>
+          </div>
+          
+          <div class="image-upload-section">
+            <input type="file" 
+                   (change)="onFileSelected($event)" 
+                   accept="image/*"
+                   #fileInput
+                   style="display: none;">
+            <button (click)="fileInput.click()" class="btn btn-secondary">
+              Choose Image
+            </button>
+            <button *ngIf="selectedFile" 
+                    (click)="uploadImage()" 
+                    class="btn btn-primary">
+              Upload
+            </button>
+          </div>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="profile-details">
+          <h3>Personal Information</h3>
+          
+          <div *ngIf="!editMode" class="profile-view">
+            <div class="info-row">
+              <span class="info-label">Email:</span>
+              <span class="info-value">{{ profile.email }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Name:</span>
+              <span class="info-value">{{ profile.name || 'Not set' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Phone:</span>
+              <span class="info-value">{{ profile.phoneNumber || 'Not set' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Birthday:</span>
+              <span class="info-value">{{ profile.birthday || 'Not set' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Address:</span>
+              <span class="info-value">{{ profile.address || 'Not set' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">City:</span>
+              <span class="info-value">{{ profile.city || 'Not set' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Member since:</span>
+              <span class="info-value">{{ profile.createdAt | date:'mediumDate' }}</span>
+            </div>
+
+            <button (click)="enableEditMode()" class="btn btn-primary">Edit Profile</button>
+          </div>
+
+          <div *ngIf="editMode" class="profile-edit">
+            <form (ngSubmit)="saveProfile()">
+              <div class="form-group">
+                <label>Name:</label>
+                <input type="text" [(ngModel)]="profileForm.name" name="name" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label>Phone Number:</label>
+                <input type="tel" [(ngModel)]="profileForm.phoneNumber" name="phoneNumber" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label>Birthday:</label>
+                <input type="date" [(ngModel)]="profileForm.birthday" name="birthday" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label>Address:</label>
+                <input type="text" [(ngModel)]="profileForm.address" name="address" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label>City:</label>
+                <input type="text" [(ngModel)]="profileForm.city" name="city" class="form-input">
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" (click)="cancelEdit()" class="btn btn-cancel">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Reviews Tab -->
+    <div *ngIf="activeTab === 'reviews'" class="tab-content">
+      <h3>My Reviews</h3>
+      
+      <div *ngIf="!profile.reviews || profile.reviews.length === 0" class="no-data">
+        <p>You haven't left any reviews yet.</p>
+      </div>
+
+      <div *ngIf="profile.reviews && profile.reviews.length > 0" class="reviews-list">
+        <div *ngFor="let review of profile.reviews" class="review-item">
+          <div class="review-header">
+            <h4>
+              <a [routerLink]="['/locations', review.location?.name]">
+                {{ review.location?.name }}
+              </a>
+            </h4>
+            <span class="review-date">{{ review.createdAt | date:'medium' }}</span>
+          </div>
+          
+          <div class="review-details">
+            <div *ngIf="review.event" class="review-event">
+              <strong>Event:</strong> {{ review.event.name }}
+            </div>
+            
+            <div *ngIf="review.rate" class="review-ratings">
+              <span *ngIf="review.rate.performance" class="rating-badge">
+                Performance: {{ review.rate.performance }}/10
+              </span>
+              <span *ngIf="review.rate.soundAndLightning" class="rating-badge">
+                Sound & Lightning: {{ review.rate.soundAndLightning }}/10
+              </span>
+              <span *ngIf="review.rate.venue" class="rating-badge">
+                Venue: {{ review.rate.venue }}/10
+              </span>
+              <span *ngIf="review.rate.overallImpression" class="rating-badge">
+                Overall: {{ review.rate.overallImpression }}/10
+              </span>
+            </div>
+            
+            <div class="review-average">
+              Average: <strong>{{ getAverageRating(review).toFixed(1) }}/10</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Managed Locations Tab -->
+    <div *ngIf="activeTab === 'managed'" class="tab-content">
+      <h3>Managed Locations</h3>
+      
+      <div *ngIf="!profile.managedLocations || profile.managedLocations.length === 0" class="no-data">
+        <p>You are not managing any locations.</p>
+      </div>
+
+      <div *ngIf="profile.managedLocations && profile.managedLocations.length > 0" class="managed-list">
+        <div *ngFor="let manages of profile.managedLocations" class="managed-item">
+          <h4>
+            <a [routerLink]="['/locations', manages.location?.name]">
+              {{ manages.location?.name }}
+            </a>
+          </h4>
+          <p class="location-type">{{ manages.location?.type }}</p>
+          <p class="location-address">{{ manages.location?.address }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Tab -->
+    <div *ngIf="activeTab === 'password'" class="tab-content">
+      <h3>Change Password</h3>
+      
+      <div class="password-section">
+        <form (ngSubmit)="submitPasswordChange()" class="password-form">
+          <div class="form-group">
+            <label>Current Password:</label>
+            <input type="password" 
+                   [(ngModel)]="passwordForm.currentPassword" 
+                   name="currentPassword"
+                   required
+                   class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label>New Password:</label>
+            <input type="password" 
+                   [(ngModel)]="passwordForm.newPassword" 
+                   name="newPassword"
+                   required
+                   minlength="6"
+                   class="form-input">
+            <small class="form-hint">At least 6 characters</small>
+          </div>
+
+          <div class="form-group">
+            <label>Confirm New Password:</label>
+            <input type="password" 
+                   [(ngModel)]="passwordForm.confirmPassword" 
+                   name="confirmPassword"
+                   required
+                   class="form-input">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Change Password</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+

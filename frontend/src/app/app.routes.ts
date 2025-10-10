@@ -10,12 +10,14 @@ import { LoginComponent } from './components/login/login';
 import { RegisterComponent } from './components/register/register';
 import { AccountRequestsComponent } from './components/account-requests/account-requests';
 import { AdminHomeComponent } from './components/admin-home/admin-home';
+import { ProfileComponent } from './components/profile/profile';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'profile', component: ProfileComponent },
   { path: 'admin/requests', component: AccountRequestsComponent },
   { path: 'admin/home', component: AdminHomeComponent },
   { path: 'requests', component: AccountRequestsComponent },
