@@ -39,7 +39,7 @@ public class AuthController {
 	@PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         // Admin user does not have an AccountRequest, so we bypass this check for them.
-        if (!"admin@system.local".equals(request.email())) {
+        if (!"admin@gmail.com".equals(request.email())) {
             AccountRequest ar = accountRequestRepository.findById(request.email()).orElse(null);
             if (ar == null || ar.getStatus() != RequestStatus.ACCEPTED) {
                 return ResponseEntity.badRequest().body(new MessageResponse("Registration not accepted or does not exist."));

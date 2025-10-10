@@ -60,7 +60,7 @@ public class ReviewController {
         String email = principal.getUsername();
         
         // Check if user is admin
-        if (email.equals("admin@system.local")) {
+        if (email.equals("admin@gmail.com")) {
             return ResponseEntity.status(403).body("Administrators cannot leave reviews");
         }
 

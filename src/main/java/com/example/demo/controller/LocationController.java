@@ -35,7 +35,7 @@ public class LocationController {
 
     @PostMapping
     public ResponseEntity<Location> create(@AuthenticationPrincipal UserDetails principal, @RequestBody CreateLocationRequest req) {
-        if (principal == null || !principal.getUsername().equals("admin@system.local")) {
+        if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
             return ResponseEntity.status(403).build();
         }
 		Location l = new Location();
@@ -50,7 +50,7 @@ public class LocationController {
     public ResponseEntity<Location> update(@AuthenticationPrincipal UserDetails principal, @PathVariable String name, @RequestBody UpdateLocationRequest req) {
         if (principal == null) return ResponseEntity.status(401).build();
         String email = principal.getUsername();
-        boolean isAdmin = email.equals("admin@system.local");
+        boolean isAdmin = email.equals("admin@gmail.com");
         boolean isManager = !managesRepository
                 .findByUserEmailAndLocationName(email, name)
                 .isEmpty();
@@ -70,7 +70,7 @@ public class LocationController {
 
     @DeleteMapping("/{name}")
     public ResponseEntity<?> delete(@AuthenticationPrincipal UserDetails principal, @PathVariable String name) {
-        if (principal == null || !principal.getUsername().equals("admin@system.local")) {
+        if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
             return ResponseEntity.status(403).build();
         }
         locationService.delete(name);
@@ -83,7 +83,7 @@ public class LocationController {
 	public ResponseEntity<?> addManager(@AuthenticationPrincipal UserDetails principal,
 			@PathVariable String name,
 			@RequestParam String email) {
-		if (principal == null || !principal.getUsername().equals("admin@system.local")) {
+		if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
 			return ResponseEntity.status(403).build();
 		}
 		
@@ -122,7 +122,7 @@ public class LocationController {
 	public ResponseEntity<?> removeManager(@AuthenticationPrincipal UserDetails principal,
 			@PathVariable String name,
 			@PathVariable String email) {
-		if (principal == null || !principal.getUsername().equals("admin@system.local")) {
+		if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
 			return ResponseEntity.status(403).build();
 		}
 		
@@ -139,7 +139,7 @@ public class LocationController {
 	// List managers for a location (admin-only)
 	@GetMapping("/{name}/managers")
 	public ResponseEntity<?> listManagers(@AuthenticationPrincipal UserDetails principal, @PathVariable String name) {
-		if (principal == null || !principal.getUsername().equals("admin@system.local")) {
+		if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
 			return ResponseEntity.status(403).build();
 		}
 		return ResponseEntity.ok(managesRepository.findByLocationName(name));
@@ -148,13 +148,13 @@ public class LocationController {
 	// Get all users for manager assignment (admin-only)
 	@GetMapping("/users")
 	public ResponseEntity<?> getAllUsers(@AuthenticationPrincipal UserDetails principal) {
-		if (principal == null || !principal.getUsername().equals("admin@system.local")) {
+		if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
 			return ResponseEntity.status(403).build();
 		}
 		// Return all users except admin
 		List<com.example.demo.model.User> users = userRepository.findAll()
 			.stream()
-			.filter(user -> !user.getEmail().equals("admin@system.local"))
+			.filter(user -> !user.getEmail().equals("admin@gmail.com"))
 			.toList();
 		return ResponseEntity.ok(users);
 	}
@@ -162,7 +162,7 @@ public class LocationController {
 	// Get users who are NOT managers of a specific location (admin-only)
 	@GetMapping("/{name}/available-users")
 	public ResponseEntity<?> getAvailableUsers(@AuthenticationPrincipal UserDetails principal, @PathVariable String name) {
-		if (principal == null || !principal.getUsername().equals("admin@system.local")) {
+		if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
 			return ResponseEntity.status(403).build();
 		}
 		
@@ -172,7 +172,7 @@ public class LocationController {
 		// Get all users except admin
 		List<com.example.demo.model.User> allUsers = userRepository.findAll()
 			.stream()
-			.filter(user -> !user.getEmail().equals("admin@system.local"))
+			.filter(user -> !user.getEmail().equals("admin@gmail.com"))
 			.toList();
 		
 		System.out.println("All users count: " + allUsers.size());
