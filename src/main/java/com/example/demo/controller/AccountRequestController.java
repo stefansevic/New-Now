@@ -27,8 +27,8 @@ public class AccountRequestController {
 	}
 
 	@PostMapping("/{email}/approve")
-	public ResponseEntity<AccountRequest> approve(@PathVariable String email, @RequestParam String name) {
-		return ResponseEntity.ok(service.approve(email, name));
+	public ResponseEntity<AccountRequest> approve(@PathVariable String email) {
+		return ResponseEntity.ok(service.approve(email));
 	}
 
 	@PostMapping("/{email}/reject")

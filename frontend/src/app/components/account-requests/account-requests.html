@@ -1,13 +1,23 @@
 <h2>Pending Registration Requests</h2>
 
-<div *ngIf="requests.length === 0">
+<div *ngIf="requests.length === 0" class="no-requests">
   <p>No pending requests.</p>
 </div>
 
-<ul *ngIf="requests.length > 0">
-  <li *ngFor="let request of requests">
-    {{ request.firstName }} {{ request.lastName }} ({{ request.email }})
-    <button (click)="approve(request.email)">Approve</button>
-    <button (click)="reject(request.email)">Reject</button>
-  </li>
-</ul>
+<div *ngIf="requests.length > 0" class="requests-list">
+  <div *ngFor="let request of requests" class="request-card">
+    <div class="request-info">
+      <h3>{{ request.name }}</h3>
+      <p><strong>Email:</strong> {{ request.email }}</p>
+      <p><strong>Phone:</strong> {{ request.phoneNumber }}</p>
+      <p><strong>Birthday:</strong> {{ request.birthday | date:'mediumDate' }}</p>
+      <p><strong>Address:</strong> {{ request.address }}</p>
+      <p><strong>City:</strong> {{ request.city }}</p>
+      <p><strong>Requested:</strong> {{ request.createdAt | date:'medium' }}</p>
+    </div>
+    <div class="request-actions">
+      <button (click)="approve(request.email)" class="btn btn-approve">Approve</button>
+      <button (click)="reject(request.email)" class="btn btn-reject">Reject</button>
+    </div>
+  </div>
+</div>

@@ -4,9 +4,13 @@ import { CommonModule } from '@angular/common';
 
 interface AccountRequest {
   email: string;
-  firstName: string;
-  lastName: string;
+  name: string;
+  phoneNumber: string;
+  birthday: string;
+  address: string;
+  city: string;
   status: string;
+  createdAt: string;
 }
 
 @Component({
@@ -35,9 +39,7 @@ export class AccountRequestsComponent implements OnInit {
   }
 
   approve(email: string): void {
-    // Hardcoded name for now as per backend requirement
-    const name = "Default Name"; 
-    this.requestService.approveRequest(email, name).subscribe({
+    this.requestService.approveRequest(email).subscribe({
       next: () => this.loadRequests(),
       error: (err: any) => console.error('Failed to approve request', err)
     });

@@ -14,8 +14,8 @@ export class AccountRequestService {
     return this.http.get<any[]>(this.baseUrl);
   }
 
-  approveRequest(email: string, name: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/${email}/approve`, null, { params: { name } });
+  approveRequest(email: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/${email}/approve`, null);
   }
 
   rejectRequest(email: string, reason: string): Observable<any> {

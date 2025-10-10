@@ -1,0 +1,102 @@
+h2 {
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.no-requests {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-style: italic;
+}
+
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.request-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.request-info {
+  flex: 1;
+}
+
+.request-info h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.request-info p {
+  margin: 8px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.request-info p strong {
+  color: #333;
+  margin-right: 8px;
+}
+
+.request-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 120px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-approve {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-approve:hover {
+  background-color: #218838;
+}
+
+.btn-reject {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-reject:hover {
+  background-color: #c82333;
+}
+
+@media (max-width: 600px) {
+  .request-card {
+    flex-direction: column;
+  }
+
+  .request-actions {
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
