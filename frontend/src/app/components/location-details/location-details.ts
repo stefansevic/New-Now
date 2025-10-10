@@ -94,15 +94,14 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
   loadReviews(locationName: string): void {
     this.reviewService.getReviewsByLocation(locationName).subscribe({
       next: (data) => {
-        // Filter out deleted reviews for non-managers
-        // Managers see all reviews, regular users don't see deleted ones
+        // Filter reviews based on user role
         this.reviews = data.filter(r => {
           // If user is manager of this location, show all (including deleted/hidden)
           if (this.isManager) {
             return true;
           }
-          // Regular users don't see deleted reviews
-          return !r.review?.deleted;
+          // Regular users don't see deleted OR hidden reviews
+          return !r.review?.deleted && !r.review?.hidden;
         });
         console.log('Reviews loaded:', this.reviews);
       },

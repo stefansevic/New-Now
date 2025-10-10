@@ -120,17 +120,18 @@
   margin-bottom: 12px;
 }
 
-.rating-stars {
-  color: #ffc107;
-  font-size: 16px;
+.rating-label {
+  font-weight: 500;
+  color: #666;
+  font-size: 14px;
 }
 
 .rating-value {
   background: #4CAF50;
   color: white;
-  padding: 2px 8px;
+  padding: 4px 10px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
 }
 
