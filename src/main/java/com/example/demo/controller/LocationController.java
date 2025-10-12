@@ -33,6 +33,7 @@ public class LocationController {
         this.userRepository = userRepository;
 	}
 
+    // Samo admin moze da kreira nove lokacije
     @PostMapping
     public ResponseEntity<Location> create(@AuthenticationPrincipal UserDetails principal, @RequestBody CreateLocationRequest req) {
         if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
@@ -46,6 +47,7 @@ public class LocationController {
 		return ResponseEntity.ok(locationService.create(l, req.imagePaths()));
 	}
 
+    // Update lokacije moze admin ili menadzer te lokacije
     @PutMapping("/{name}")
     public ResponseEntity<Location> update(@AuthenticationPrincipal UserDetails principal, @PathVariable String name, @RequestBody UpdateLocationRequest req) {
         if (principal == null) return ResponseEntity.status(401).build();

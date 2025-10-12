@@ -25,8 +25,9 @@ public class LocationService {
         this.imageRepository = imageRepository;
     }
 
+    // Kreiranje nove lokacije sa slikom
     public Location create(Location location, List<String> imagePaths) {
-		if (location.getName() == null || location.getAddress() == null || location.getType() == null || location.getDescription() == null) {
+		if (location.getName() == null || location.getAddress() == null || location.getType() == null) {
 			throw new IllegalArgumentException("Missing required fields");
 		}
 		if (imagePaths == null || imagePaths.isEmpty()) {
@@ -50,14 +51,14 @@ public class LocationService {
 		return locationRepository.save(loc);
 	}
 
+	// Racuna prosecnu ocenu lokacije na osnovu review-a (obrisani se ne racunaju)
 	public double computeAverageRating(Location location) {
 		List<Review> reviews = reviewRepository.findByLocation(location);
 		if (reviews.isEmpty()) return 0.0;
 		double sum = 0.0;
 		int count = 0;
 		for (Review r : reviews) {
-			// Skip deleted reviews - their ratings don't count
-			// Hidden reviews still count in the average
+			// Obrisani review-i se ne racunaju, a skriveni racunamo u prosek
 			if (r.getDeleted() != null && r.getDeleted()) {
 				continue;
 			}

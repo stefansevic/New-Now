@@ -38,7 +38,7 @@ public class AuthController {
 
 	@PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        // Admin user does not have an AccountRequest, so we bypass this check for them.
+        // Admin nema AccountRequest pa ga preskacemo, ostali moraju imati prihvacen zahtev
         if (!"admin@gmail.com".equals(request.email())) {
             AccountRequest ar = accountRequestRepository.findById(request.email()).orElse(null);
             if (ar == null || ar.getStatus() != RequestStatus.ACCEPTED) {

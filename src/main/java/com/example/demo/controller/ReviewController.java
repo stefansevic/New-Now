@@ -51,6 +51,7 @@ public class ReviewController {
         this.managesRepository = managesRepository;
     }
 
+    // Kreiranje review-a za lokaciju - admin i menadzeri ne mogu da ostavljaju review
     @PostMapping
     @Transactional
     public ResponseEntity<?> createReview(@AuthenticationPrincipal UserDetails principal, 
@@ -59,7 +60,7 @@ public class ReviewController {
 
         String email = principal.getUsername();
         
-        // Check if user is admin
+        // Admin ne moze da ostavlja review-e
         if (email.equals("admin@gmail.com")) {
             return ResponseEntity.status(403).body("Administrators cannot leave reviews");
         }
@@ -68,7 +69,7 @@ public class ReviewController {
         Location location = locationRepository.findById(req.locationName()).orElse(null);
         if (location == null) return ResponseEntity.badRequest().body("Location not found");
         
-        // Check if user is manager of this location
+        // Menadzer lokacije ne moze da ostavlja review za tu lokaciju
         boolean isManager = !managesRepository.findByUserEmailAndLocationName(email, req.locationName()).isEmpty();
         if (isManager) {
             return ResponseEntity.status(403).body("Managers cannot leave reviews on locations they manage");
@@ -78,13 +79,12 @@ public class ReviewController {
         Event event = eventRepository.findById(req.eventName()).orElse(null);
         if (event == null) return ResponseEntity.badRequest().body("Event not found");
 
-        // Validation 1: Event must be recurrent
+        // Validacija: dogadjaj mora biti recurrent i mora biti prosledjen
         if (event.getRecurrent() == null || !event.getRecurrent()) {
             return ResponseEntity.badRequest().body("Reviews can only be left for recurrent events");
         }
 
-        // Validation 2: Event must have already occurred
-        if (event.getDate() == null || !event.getDate().isBefore(LocalDate.now())) {
+        if (event.getDate() == null || event.getDate().isAfter(LocalDate.now())) {
             return ResponseEntity.badRequest().body("Reviews can only be left for past events");
         }
 
@@ -206,7 +206,7 @@ public class ReviewController {
         return ResponseEntity.ok(allEvents);
     }
 
-    // Hide review (manager only)
+    // Sakrivanje review-a od strane menadzera
     @PutMapping("/{createdAt}/hide")
     public ResponseEntity<?> hideReview(@AuthenticationPrincipal UserDetails principal, 
                                        @PathVariable String createdAt) {
@@ -216,7 +216,7 @@ public class ReviewController {
         Review review = reviewRepository.findById(reviewTime).orElse(null);
         if (review == null) return ResponseEntity.badRequest().body("Review not found");
 
-        // Check if user is manager of this location
+        // Samo menadzer lokacije moze da sakrije review
         String email = principal.getUsername();
         boolean isManager = !managesRepository
             .findByUserEmailAndLocationName(email, review.getLocation().getName())

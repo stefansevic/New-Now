@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+// Controller za upravljanje zahtevima za registraciju korisnika
 @RestController
 @RequestMapping("/api/account-requests")
 public class AccountRequestController {

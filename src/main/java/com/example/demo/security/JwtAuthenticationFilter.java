@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+// Filter koji presrece sve HTTP zahteve i validira JWT token
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -28,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+		// Izvlaci Authorization header i proverava da li sadrzi Bearer token
 		final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			filterChain.doFilter(request, response);

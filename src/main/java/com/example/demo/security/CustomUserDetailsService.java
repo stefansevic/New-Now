@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+// Servis za ucitavanje korisnickih podataka iz baze za autentifikaciju
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -26,6 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 		User user = userRepository.findById(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 		
+		// Dodela uloga - razlikujemo administratora od obicnog korisnika
 		List<SimpleGrantedAuthority> authorities;
 		if (user instanceof Administrator) {
 			authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));

@@ -23,12 +23,13 @@ public class AccountRequestService {
         this.passwordEncoder = passwordEncoder;
     }
 
+	// Slanje zahteva za registraciju - proverava da li korisnik vec postoji
 	public AccountRequest submit(AccountRequest request) {
-		// disallow if user already exists
+		// Odbijamo ako korisnik vec postoji
 		if (userRepository.existsById(request.getEmail())) {
 			throw new IllegalStateException("User already exists");
 		}
-		// disallow duplicate PENDING or ACCEPTED request for same email
+		// Odbijamo duplikat PENDING ili ACCEPTED zahtev
 		accountRequestRepository.findById(request.getEmail()).ifPresent(existing -> {
 			if (existing.getStatus() == RequestStatus.PENDING || existing.getStatus() == RequestStatus.ACCEPTED) {
 				throw new IllegalStateException("Request already exists and is pending or approved");
@@ -44,6 +45,7 @@ public class AccountRequestService {
 		return accountRequestRepository.findAll();
 	}
 
+	// Odobravanje zahteva - kreira novog korisnika u bazi
 	public AccountRequest approve(String email) {
 		AccountRequest req = accountRequestRepository.findById(email).orElseThrow();
 		if (req.getStatus() != RequestStatus.PENDING) {
@@ -53,7 +55,7 @@ public class AccountRequestService {
 		req.setRejectionReason(null);
 		accountRequestRepository.save(req);
 		
-		// Create User with all data from AccountRequest
+		// Kreiranje korisnika sa podacima iz zahteva
 		User user = new User();
 		user.setEmail(req.getEmail());
 		user.setPassword(passwordEncoder.encode(req.getPassword()));

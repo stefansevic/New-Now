@@ -30,7 +30,7 @@ public class EventController {
         this.managesRepository = managesRepository;
     }
 
-    // Create event - only managers of the location
+    // Kreiranje dogadjaja - samo menadzer lokacije
     @PostMapping
     public ResponseEntity<?> createEvent(@AuthenticationPrincipal UserDetails principal, @RequestBody CreateEventRequest req) {
         if (principal == null) return ResponseEntity.status(401).build();
@@ -56,7 +56,7 @@ public class EventController {
         return ResponseEntity.ok(eventRepository.save(event));
     }
 
-    // Update event - only managers of the location
+    // Azuriranje dogadjaja - samo menadzer lokacije
     @PutMapping("/{name}")
     public ResponseEntity<?> updateEvent(@AuthenticationPrincipal UserDetails principal, @PathVariable String name, @RequestBody UpdateEventRequest req) {
         if (principal == null) return ResponseEntity.status(401).build();

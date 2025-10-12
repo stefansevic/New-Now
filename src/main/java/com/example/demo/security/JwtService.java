@@ -16,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+// Servis za kreiranje i validaciju JWT tokena
 @Service
 public class JwtService {
 
@@ -25,6 +26,7 @@ public class JwtService {
 	@Value("${jwt.expiration}")
 	private long expirationMs;
 
+	// Izvlacenje korisnickog imena iz tokena
 	public String extractUsername(String token) {
 		return extractClaim(token, Claims::getSubject);
 	}
@@ -38,6 +40,7 @@ public class JwtService {
 		return claimsResolver.apply(claims);
 	}
 
+	// Generisanje JWT tokena za korisnika sa ulogama
 	public String generateToken(UserDetails userDetails) {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("roles", userDetails.getAuthorities().stream()

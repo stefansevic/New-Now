@@ -67,7 +67,7 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Get current user profile
+    // Preuzimanje profila trenutnog korisnika
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetails principal) {
         if (principal == null) {
@@ -102,7 +102,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // Change password
+    // Promena lozinke korisnika
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(
         @AuthenticationPrincipal UserDetails principal,
@@ -118,7 +118,7 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
 
-        // Verify current password
+        // Provera trenutne lozinke
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             return ResponseEntity.badRequest().body("Current password is incorrect");
         }
@@ -140,7 +140,7 @@ public class UserController {
         return ResponseEntity.ok("Password changed successfully");
     }
 
-    // Update profile
+    // Azuriranje profila korisnika
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(
         @AuthenticationPrincipal UserDetails principal,
