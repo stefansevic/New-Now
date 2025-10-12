@@ -123,12 +123,12 @@ public class UserController {
             return ResponseEntity.badRequest().body("Current password is incorrect");
         }
 
-        // Verify new passwords match
+        // Provera da li se nove lozinke poklapaju
         if (!request.newPassword().equals(request.confirmPassword())) {
             return ResponseEntity.badRequest().body("New passwords do not match");
         }
 
-        // Validate new password length
+        // Provera minimalne duzine lozinke
         if (request.newPassword().length() < 6) {
             return ResponseEntity.badRequest().body("New password must be at least 6 characters");
         }
@@ -156,7 +156,7 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
 
-        // Update fields
+        // Azuriranje polja profila
         if (request.name() != null) user.setName(request.name());
         if (request.phoneNumber() != null) user.setPhoneNumber(request.phoneNumber());
         if (request.birthday() != null && !request.birthday().isEmpty()) {
