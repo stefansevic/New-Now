@@ -79,12 +79,12 @@ public class ReviewController {
         Event event = eventRepository.findById(req.eventName()).orElse(null);
         if (event == null) return ResponseEntity.badRequest().body("Event not found");
 
-        // Validacija: dogadjaj mora biti recurrent i mora biti prosledjen
+        // Validacija: dogadjaj mora biti recurrent i mora biti u proslosti
         if (event.getRecurrent() == null || !event.getRecurrent()) {
             return ResponseEntity.badRequest().body("Reviews can only be left for recurrent events");
         }
 
-        if (event.getDate() == null || event.getDate().isAfter(LocalDate.now())) {
+        if (event.getDate() == null || !event.getDate().isBefore(LocalDate.now())) {
             return ResponseEntity.badRequest().body("Reviews can only be left for past events");
         }
 

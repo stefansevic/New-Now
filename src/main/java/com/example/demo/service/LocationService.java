@@ -27,7 +27,7 @@ public class LocationService {
 
     // Kreiranje nove lokacije sa slikom
     public Location create(Location location, List<String> imagePaths) {
-		if (location.getName() == null || location.getAddress() == null || location.getType() == null) {
+		if (location.getName() == null || location.getAddress() == null || location.getType() == null || location.getDescription() == null) {
 			throw new IllegalArgumentException("Missing required fields");
 		}
 		if (imagePaths == null || imagePaths.isEmpty()) {

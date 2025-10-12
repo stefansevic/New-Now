@@ -80,10 +80,10 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
 
-        // Get user's reviews
+        // Ucitavanje review-a korisnika
         List<Review> reviews = reviewRepository.findByUser(user);
 
-        // Get managed locations
+        // Ucitavanje lokacija koje korisnik menadzira
         List<Manages> managedLocations = managesRepository.findByUserEmail(email);
 
         UserProfileResponse response = new UserProfileResponse(

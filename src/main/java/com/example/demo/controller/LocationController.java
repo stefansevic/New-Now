@@ -62,7 +62,11 @@ public class LocationController {
 
 	@GetMapping("/{name}")
     public ResponseEntity<LocationService.LocationDetails> details(@PathVariable String name) {
-		return ResponseEntity.ok(locationService.getDetails(name));
+		try {
+			return ResponseEntity.ok(locationService.getDetails(name));
+		} catch (Exception e) {
+			return ResponseEntity.notFound().build();
+		}
 	}
 
 	@GetMapping
