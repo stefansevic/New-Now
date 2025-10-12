@@ -190,13 +190,13 @@ public class UserController {
         }
 
         try {
-            // Create uploads directory if it doesn't exist
+            // Kreiranje uploads direktorijuma ako ne postoji
             Path uploadDir = Paths.get("uploads/profiles");
             if (!Files.exists(uploadDir)) {
                 Files.createDirectories(uploadDir);
             }
 
-            // Generate unique filename
+            // Generisanje jedinstvenog naziva fajla
             String originalFilename = file.getOriginalFilename();
             if (originalFilename == null || !originalFilename.contains(".")) {
                 return ResponseEntity.badRequest().body("Invalid file name");
