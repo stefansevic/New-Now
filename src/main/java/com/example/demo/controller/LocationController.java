@@ -79,7 +79,7 @@ public class LocationController {
         return ResponseEntity.ok().build();
     }
 
-	// Admin-only - add manager to a location
+	// Dodaj managera (samo admin)
 	@PostMapping("/{name}/managers")
 	@Transactional
 	public ResponseEntity<?> addManager(@AuthenticationPrincipal UserDetails principal,
@@ -89,17 +89,17 @@ public class LocationController {
 			return ResponseEntity.status(403).build();
 		}
 		
-		// Check if user exists
+		// proveri jel postoji user
 		if (!userRepository.existsById(email)) {
 			return ResponseEntity.badRequest().body("User does not exist");
 		}
 		
-		// Check if location exists
+		// proveri jel postoji lokacija
 		if (!locationRepository.existsById(name)) {
 			return ResponseEntity.badRequest().body("Location does not exist");
 		}
 		
-		// Check if user is already a manager for this location
+		// proveri jel user vec jeste manager te lokacije
 		List<Manages> existingManages = managesRepository.findByUserEmailAndLocationName(email, name);
 		if (!existingManages.isEmpty()) {
 			return ResponseEntity.badRequest().body("User is already a manager for this location");
@@ -118,7 +118,7 @@ public class LocationController {
 		return ResponseEntity.ok().build();
 	}
 
-	// Admin-only - remove manager from a location
+	// remove manager (admin)
 	@DeleteMapping("/{name}/managers/{email}")
 	@Transactional
 	public ResponseEntity<?> removeManager(@AuthenticationPrincipal UserDetails principal,
@@ -128,7 +128,7 @@ public class LocationController {
 			return ResponseEntity.status(403).build();
 		}
 		
-		// Check if the management relationship exists
+		// proveri da li postoji managerska veza (man-lok)
 		List<Manages> manages = managesRepository.findByUserEmailAndLocationName(email, name);
 		if (manages.isEmpty()) {
 			return ResponseEntity.badRequest().body("User is not a manager for this location");
@@ -138,7 +138,7 @@ public class LocationController {
 		return ResponseEntity.ok().build();
 	}
 
-	// List managers for a location (admin-only)
+	// Izlistaj managere za lokaciju
 	@GetMapping("/{name}/managers")
 	public ResponseEntity<?> listManagers(@AuthenticationPrincipal UserDetails principal, @PathVariable String name) {
 		if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
@@ -147,13 +147,13 @@ public class LocationController {
 		return ResponseEntity.ok(managesRepository.findByLocationName(name));
 	}
 
-	// Get all users for manager assignment (admin-only)
+	// get all users
 	@GetMapping("/users")
 	public ResponseEntity<?> getAllUsers(@AuthenticationPrincipal UserDetails principal) {
 		if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
 			return ResponseEntity.status(403).build();
 		}
-		// Return all users except admin
+		// vrati sve sem admina
 		List<com.example.demo.model.User> users = userRepository.findAll()
 			.stream()
 			.filter(user -> !user.getEmail().equals("admin@gmail.com"))
@@ -161,7 +161,7 @@ public class LocationController {
 		return ResponseEntity.ok(users);
 	}
 
-	// Get users who are NOT managers of a specific location (admin-only)
+	// Get users koji nisu manageri te lokaicje
 	@GetMapping("/{name}/available-users")
 	public ResponseEntity<?> getAvailableUsers(@AuthenticationPrincipal UserDetails principal, @PathVariable String name) {
 		if (principal == null || !principal.getUsername().equals("admin@gmail.com")) {
@@ -171,7 +171,7 @@ public class LocationController {
 		System.out.println("=== AVAILABLE USERS REQUEST ===");
 		System.out.println("Location: " + name);
 		
-		// Get all users except admin
+		// get sve sem admina
 		List<com.example.demo.model.User> allUsers = userRepository.findAll()
 			.stream()
 			.filter(user -> !user.getEmail().equals("admin@gmail.com"))
@@ -180,7 +180,7 @@ public class LocationController {
 		System.out.println("All users count: " + allUsers.size());
 		allUsers.forEach(user -> System.out.println("  - " + user.getEmail() + " (" + user.getName() + ")"));
 		
-		// Get current managers of this location
+		// get trenutne managere lokacije
 		List<Manages> currentManagers = managesRepository.findByLocationName(name);
 		List<String> managerEmails = currentManagers.stream()
 			.map(m -> m.getUser().getEmail())
@@ -189,7 +189,7 @@ public class LocationController {
 		System.out.println("Current managers count: " + managerEmails.size());
 		managerEmails.forEach(email -> System.out.println("  - " + email));
 		
-		// Filter out current managers
+		// ne prikazuj vec postojece managere te lokacije (filtriraj)
 		List<com.example.demo.model.User> availableUsers = allUsers.stream()
 			.filter(user -> !managerEmails.contains(user.getEmail()))
 			.toList();
@@ -201,7 +201,7 @@ public class LocationController {
 		return ResponseEntity.ok(availableUsers);
 	}
 
-	// Get locations managed by current user
+	// get lokacije kojima upravlja trenutni user
 	@GetMapping("/my-managed-locations")
 	public ResponseEntity<?> getMyManagedLocations(@AuthenticationPrincipal UserDetails principal) {
 		if (principal == null) {
@@ -210,7 +210,7 @@ public class LocationController {
 		String email = principal.getUsername();
 		List<Manages> manages = managesRepository.findByUserEmail(email);
 		
-		// Load location details with images for each managed location
+		// prikazi LocationsDetails
 		List<LocationService.LocationDetails> locationDetails = manages.stream()
 			.map(manage -> locationService.getDetails(manage.getLocation().getName()))
 			.toList();

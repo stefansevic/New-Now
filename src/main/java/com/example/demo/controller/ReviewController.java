@@ -51,7 +51,7 @@ public class ReviewController {
         this.managesRepository = managesRepository;
     }
 
-    // Kreiranje review-a za lokaciju - admin i menadzeri ne mogu da ostavljaju review
+    // Kreiranje review-a za lokaciju (samo user koji nije manager za tu lokaciju ili admin)
     @PostMapping
     @Transactional
     public ResponseEntity<?> createReview(@AuthenticationPrincipal UserDetails principal, 
@@ -79,7 +79,7 @@ public class ReviewController {
         Event event = eventRepository.findById(req.eventName()).orElse(null);
         if (event == null) return ResponseEntity.badRequest().body("Event not found");
 
-        // Validacija: dogadjaj mora biti recurrent i mora biti u proslosti
+        // event mora biti recurrent i mora biti u proslosti
         if (event.getRecurrent() == null || !event.getRecurrent()) {
             return ResponseEntity.badRequest().body("Reviews can only be left for recurrent events");
         }
@@ -88,12 +88,12 @@ public class ReviewController {
             return ResponseEntity.badRequest().body("Reviews can only be left for past events");
         }
 
-        // Validation 3: Event must belong to the location
+        // event mora pripadati lokaciji
         if (!event.getLocation().getName().equals(location.getName())) {
             return ResponseEntity.badRequest().body("Event does not belong to this location");
         }
 
-        // Calculate event count (how many times this recurrent event has occurred)
+        // koliko puta se reccurent dogadjaj dogodio
         int eventCount = eventRepository.countByNameAndLocationAndDateBefore(
             event.getName(), 
             location, 
@@ -104,7 +104,7 @@ public class ReviewController {
         User user = userRepository.findById(principal.getUsername()).orElse(null);
         if (user == null) return ResponseEntity.status(401).build();
 
-        // Validate ratings are between 1-10
+        // validacija (ocenjivanje 1-10)
         if (req.performance() != null && (req.performance() < 1 || req.performance() > 10)) {
             return ResponseEntity.badRequest().body("Performance rating must be between 1 and 10");
         }
@@ -118,7 +118,7 @@ public class ReviewController {
             return ResponseEntity.badRequest().body("Overall impression rating must be between 1 and 10");
         }
 
-        // Create Rate if at least one rating is provided
+        // Napravi ocenu ako se barem jedan entitet ocenio
         Rate rate = null;
         if (req.performance() != null || req.soundAndLightning() != null || 
             req.venue() != null || req.overallImpression() != null) {
@@ -131,7 +131,7 @@ public class ReviewController {
             rate = rateRepository.save(rate);
         }
 
-        // Create Review
+        // Napravi review
         Review review = new Review();
         review.setCreatedAt(LocalDateTime.now());
         review.setUser(user);
@@ -144,7 +144,7 @@ public class ReviewController {
 
         review = reviewRepository.save(review);
 
-        // Create Comment if text is provided
+        // ako user ukuca text u textfield, napravi i komentar
         if (req.commentText() != null && !req.commentText().trim().isEmpty()) {
             Comment comment = new Comment();
             comment.setCreatedAt(LocalDateTime.now());
@@ -165,7 +165,7 @@ public class ReviewController {
 
         List<Review> reviews = reviewRepository.findByLocation(location);
         
-        // Get comments for each review
+        // Get comments za svaki review
         var reviewsWithComments = reviews.stream()
             .map(review -> {
                 List<Comment> comments = commentRepository.findByReview(review);
@@ -176,17 +176,17 @@ public class ReviewController {
         return ResponseEntity.ok(reviewsWithComments);
     }
 
-    // Get eligible events for review (recurrent and past events)
+    // Get evenet koji se moze oceniti (recurrent i u proslosti)
     @GetMapping("/location/{locationName}/eligible-events")
     public ResponseEntity<List<Event>> getEligibleEvents(@PathVariable String locationName) {
         Location location = locationRepository.findById(locationName).orElse(null);
         if (location == null) return ResponseEntity.badRequest().build();
 
-        // Get all events for this location
+        // Get all events za tu lokaciju
         List<Event> allEvents = eventRepository.findAll().stream()
             .filter(e -> e.getLocation() != null && e.getLocation().getName().equals(locationName))
-            .filter(e -> e.getRecurrent() != null && e.getRecurrent()) // Must be recurrent
-            .filter(e -> e.getDate() != null && e.getDate().isBefore(LocalDate.now())) // Must be in the past
+            .filter(e -> e.getRecurrent() != null && e.getRecurrent()) // mora biti recurrent
+            .filter(e -> e.getDate() != null && e.getDate().isBefore(LocalDate.now())) // mora biti u proslosti
             .toList();
 
         System.out.println("=== ELIGIBLE EVENTS DEBUG ===");
@@ -206,7 +206,7 @@ public class ReviewController {
         return ResponseEntity.ok(allEvents);
     }
 
-    // Sakrivanje review-a od strane menadzera
+    // Sakrivanje review-a
     @PutMapping("/{createdAt}/hide")
     public ResponseEntity<?> hideReview(@AuthenticationPrincipal UserDetails principal, 
                                        @PathVariable String createdAt) {
@@ -229,7 +229,7 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
-    // Unhide review (manager only)
+    // Unhide review
     @PutMapping("/{createdAt}/unhide")
     public ResponseEntity<?> unhideReview(@AuthenticationPrincipal UserDetails principal, 
                                          @PathVariable String createdAt) {
@@ -239,7 +239,7 @@ public class ReviewController {
         Review review = reviewRepository.findById(reviewTime).orElse(null);
         if (review == null) return ResponseEntity.badRequest().body("Review not found");
 
-        // Check if user is manager of this location
+        // proveri jel user manager te lokacije
         String email = principal.getUsername();
         boolean isManager = !managesRepository
             .findByUserEmailAndLocationName(email, review.getLocation().getName())
@@ -252,7 +252,7 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
-    // Delete review (manager only - logical delete)
+    // Delete review 
     @DeleteMapping("/{createdAt}")
     public ResponseEntity<?> deleteReview(@AuthenticationPrincipal UserDetails principal, 
                                          @PathVariable String createdAt) {
@@ -262,7 +262,7 @@ public class ReviewController {
         Review review = reviewRepository.findById(reviewTime).orElse(null);
         if (review == null) return ResponseEntity.badRequest().body("Review not found");
 
-        // Check if user is manager of this location
+        // proveri jel user manager te lokacije
         String email = principal.getUsername();
         boolean isManager = !managesRepository
             .findByUserEmailAndLocationName(email, review.getLocation().getName())
@@ -291,12 +291,12 @@ public class ReviewController {
         User user = userRepository.findById(email).orElse(null);
         if (user == null) return ResponseEntity.status(401).build();
 
-        // Check if user is manager of this location
+        // proveri jel user manager te lokacije
         boolean isManager = !managesRepository
             .findByUserEmailAndLocationName(email, review.getLocation().getName())
             .isEmpty();
 
-        // Find parent comment if specified
+        // nadji parent comment
         Comment parentComment = null;
         if (req.parentCommentCreatedAt() != null && !req.parentCommentCreatedAt().isEmpty()) {
             LocalDateTime parentTime = LocalDateTime.parse(req.parentCommentCreatedAt());
@@ -305,11 +305,10 @@ public class ReviewController {
                 return ResponseEntity.badRequest().body("Parent comment not found");
             }
 
-            // Validation: If parent exists, check reply permissions
-            // Manager can always reply to user comments
-            // User can only reply to manager's comments (parent.user must be manager)
+            // Manager moze da replayuye na sve komentare
+            // User moze da replayuye samo na managerov komentar 
             if (!isManager) {
-                // Regular user trying to reply - parent must be from a manager
+                
                 boolean parentIsFromManager = !managesRepository
                     .findByUserEmailAndLocationName(
                         parentComment.getUser().getEmail(), 

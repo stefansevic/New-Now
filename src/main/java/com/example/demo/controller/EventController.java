@@ -30,7 +30,7 @@ public class EventController {
         this.managesRepository = managesRepository;
     }
 
-    // Kreiranje dogadjaja - samo menadzer lokacije
+    // Kreiranje dogadjaja (samo manageri)
     @PostMapping
     public ResponseEntity<?> createEvent(@AuthenticationPrincipal UserDetails principal, @RequestBody CreateEventRequest req) {
         if (principal == null) return ResponseEntity.status(401).build();
@@ -56,7 +56,7 @@ public class EventController {
         return ResponseEntity.ok(eventRepository.save(event));
     }
 
-    // Azuriranje dogadjaja - samo menadzer lokacije
+    // Azuriranje dogadjaja (samo manageri)
     @PutMapping("/{name}")
     public ResponseEntity<?> updateEvent(@AuthenticationPrincipal UserDetails principal, @PathVariable String name, @RequestBody UpdateEventRequest req) {
         if (principal == null) return ResponseEntity.status(401).build();
@@ -79,7 +79,7 @@ public class EventController {
         return ResponseEntity.ok(eventRepository.save(event));
     }
 
-    // Delete event - only managers of the location
+    // Brisanje eventova (samo manageri)
     @DeleteMapping("/{name}")
     public ResponseEntity<?> deleteEvent(@AuthenticationPrincipal UserDetails principal, @PathVariable String name) {
         if (principal == null) return ResponseEntity.status(401).build();
@@ -96,7 +96,7 @@ public class EventController {
         return ResponseEntity.ok().build();
     }
 
-    // Get events for a location (public)
+    // Get events za lokaciju
     @GetMapping("/location/{locationName}")
     public ResponseEntity<List<Event>> getEventsByLocation(@PathVariable String locationName) {
         Location location = locationRepository.findById(locationName).orElse(null);
@@ -106,7 +106,7 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
-    // Get single event (public)
+    // Get singularni event
     @GetMapping("/{name}")
     public ResponseEntity<Event> getEvent(@PathVariable String name) {
         Event event = eventRepository.findById(name).orElse(null);
@@ -114,7 +114,7 @@ public class EventController {
         return ResponseEntity.ok(event);
     }
 
-    // Get all upcoming events (public)
+    // Get sve predstojece eventove 
     @GetMapping
     public ResponseEntity<List<Event>> getAllUpcomingEvents() {
         List<Event> upcomingEvents = eventRepository.findAll().stream()

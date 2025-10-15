@@ -11,3 +11,5 @@ public class SpaController {
         return "forward:/index.html";
     }
 }
+
+// prosledjuje SPA, tj ne-api zahteve angularu 

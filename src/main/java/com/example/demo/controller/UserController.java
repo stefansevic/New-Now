@@ -196,7 +196,7 @@ public class UserController {
                 Files.createDirectories(uploadDir);
             }
 
-            // Generisanje jedinstvenog naziva fajla
+            // Generisanje jedinstvenog naziva fajla (da kasnije ne dodje do preklapanja)
             String originalFilename = file.getOriginalFilename();
             if (originalFilename == null || !originalFilename.contains(".")) {
                 return ResponseEntity.badRequest().body("Invalid file name");

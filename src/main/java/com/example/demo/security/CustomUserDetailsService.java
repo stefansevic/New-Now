@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 		User user = userRepository.findById(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 		
-		// Dodela uloga - razlikujemo administratora od obicnog korisnika
+		// Dodela uloga (autorizacije)
 		List<SimpleGrantedAuthority> authorities;
 		if (user instanceof Administrator) {
 			authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
