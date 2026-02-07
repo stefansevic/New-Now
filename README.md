@@ -1,7 +1,6 @@
-# New-Now — SVT/KVA 2025
+# New-Now 
 
-Projektni zadatak iz predmeta **Sistemi za podršku odlučivanju (SVT)** i **Kvalitet i verifikacija softvera (KVA)**.  
-Student: **SR 22/2023**.
+Projektni zadatak iz predmeta **Serverske web tehnologije (SVT)** i **Klijentske web tehnologije (KVA)** 
 
 ---
 
