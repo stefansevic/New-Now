@@ -1,0 +1,134 @@
+.search-page {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 0 16px;
+  font-family: sans-serif;
+}
+
+.search-form fieldset {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid #ccc;
+}
+
+.search-form legend {
+  padding: 0 6px;
+  font-weight: 600;
+}
+
+.search-form .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.search-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  gap: 4px;
+  min-width: 160px;
+  flex: 1;
+}
+
+.search-form input,
+.search-form select {
+  padding: 6px 8px;
+  font-size: 14px;
+}
+
+.search-form .hint {
+  font-size: 12px;
+  color: #555;
+  margin: 0 0 8px;
+}
+
+.search-form .hint code {
+  background: #eee;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.actions button,
+.actions a {
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid #888;
+  background: #f6f6f6;
+  color: #000;
+}
+
+.status {
+  margin: 20px 0;
+  font-style: italic;
+  color: #555;
+}
+
+.results {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+
+.result {
+  border: 1px solid #ddd;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+}
+
+.result h3 {
+  margin: 0 0 6px;
+}
+
+.result h3 a {
+  color: #1a4a8a;
+  text-decoration: none;
+}
+
+.result h3 a:hover {
+  text-decoration: underline;
+}
+
+.result .desc {
+  margin: 4px 0;
+}
+
+.result .meta {
+  font-size: 13px;
+  color: #444;
+  margin: 6px 0;
+}
+
+.pdf-snippets {
+  background: #fafafa;
+  padding: 8px 12px;
+  margin-top: 8px;
+  border-left: 3px solid #ccc;
+}
+
+.pdf-snippets ul {
+  margin: 4px 0 0 16px;
+  padding: 0;
+}
+
+.pdf-snippets li {
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+em {
+  background: #ffe066;
+  font-style: normal;
+  padding: 0 2px;
+}

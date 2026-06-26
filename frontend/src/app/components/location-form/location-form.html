@@ -33,6 +33,19 @@
     </div>
   </div>
 
+  <div>
+    <label>PDF opis (opciono):</label>
+    <div *ngIf="existingPdfKey && !selectedPdfFile" style="margin-bottom: 6px;">
+      <a [href]="getExistingPdfUrl()" target="_blank">Trenutni PDF</a>
+      <span style="color: #666; font-size: 12px; margin-left: 8px;">(izaberi nov da zamenis)</span>
+    </div>
+    <input type="file" accept="application/pdf" (change)="onPdfSelected($event)">
+    <div *ngIf="selectedPdfFile" style="margin-top: 6px;">
+      <span>{{ selectedPdfName }}</span>
+      <button type="button" (click)="removePdf()" style="margin-left: 8px;">Remove</button>
+    </div>
+  </div>
+
   <button type="submit" [disabled]="locationForm.invalid">Submit</button>
   <a routerLink="/locations">Cancel</a>
 </form>

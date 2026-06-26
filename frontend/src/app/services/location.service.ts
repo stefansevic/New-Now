@@ -37,6 +37,12 @@ export class LocationService {
     return this.http.post<string[]>(`/api/files`, formData);
   }
 
+  uploadPdf(file: File): Observable<string[]> {
+    const formData = new FormData();
+    formData.append('files', file);
+    return this.http.post<string[]>(`/api/files?type=pdf`, formData);
+  }
+
   // Manager management methods
   getLocationManagers(locationName: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/${locationName}/managers`);

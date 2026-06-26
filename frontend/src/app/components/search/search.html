@@ -1,0 +1,127 @@
+<div class="search-page">
+  <h2>Pretraga mesta</h2>
+
+  <form (ngSubmit)="onSubmit()" class="search-form">
+    <fieldset>
+      <legend>Tekstualna polja</legend>
+      <p class="hint">
+        Sintaksa: <code>"fraza pod navodnicima"</code> = phrase, <code>prefiks*</code> = wildcard, <code>~približno</code> = fuzzy
+      </p>
+      <div class="row">
+        <label>Naziv:
+          <input type="text" [(ngModel)]="req.name" name="name" placeholder='npr. klub, "Klub Test", klu*, ~klob'>
+        </label>
+        <label>Opis (iz UI):
+          <input type="text" [(ngModel)]="req.descriptionUi" name="descriptionUi">
+        </label>
+        <label>Opis (iz PDF-a):
+          <input type="text" [(ngModel)]="req.descriptionPdf" name="descriptionPdf">
+        </label>
+      </div>
+      <div class="row">
+        <label>Operator izmedju polja:
+          <select [(ngModel)]="req.operator" name="operator">
+            <option value="AND">AND</option>
+            <option value="OR">OR</option>
+          </select>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Broj review-a</legend>
+      <div class="row">
+        <label>Od:
+          <input type="number" [(ngModel)]="req.reviewCountFrom" name="reviewCountFrom">
+        </label>
+        <label>Do:
+          <input type="number" [(ngModel)]="req.reviewCountTo" name="reviewCountTo">
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Prosecne ocene (1 - 10)</legend>
+      <div class="row">
+        <label>Nastup od/do:
+          <input type="number" step="0.1" [(ngModel)]="req.avgPerformanceFrom" name="avgPerformanceFrom">
+          <input type="number" step="0.1" [(ngModel)]="req.avgPerformanceTo" name="avgPerformanceTo">
+        </label>
+        <label>Zvuk i svetlo od/do:
+          <input type="number" step="0.1" [(ngModel)]="req.avgSoundLightFrom" name="avgSoundLightFrom">
+          <input type="number" step="0.1" [(ngModel)]="req.avgSoundLightTo" name="avgSoundLightTo">
+        </label>
+        <label>Prostor od/do:
+          <input type="number" step="0.1" [(ngModel)]="req.avgVenueFrom" name="avgVenueFrom">
+          <input type="number" step="0.1" [(ngModel)]="req.avgVenueTo" name="avgVenueTo">
+        </label>
+      </div>
+      <div class="row">
+        <label>Ukupan utisak od/do:
+          <input type="number" step="0.1" [(ngModel)]="req.avgOverallFrom" name="avgOverallFrom">
+          <input type="number" step="0.1" [(ngModel)]="req.avgOverallTo" name="avgOverallTo">
+        </label>
+        <label>Ukupna ocena od/do:
+          <input type="number" step="0.1" [(ngModel)]="req.avgTotalFrom" name="avgTotalFrom">
+          <input type="number" step="0.1" [(ngModel)]="req.avgTotalTo" name="avgTotalTo">
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Sortiranje</legend>
+      <label>Po nazivu:
+        <select [(ngModel)]="req.sortOrder" name="sortOrder">
+          <option value="asc">rastuce</option>
+          <option value="desc">opadajuce</option>
+        </select>
+      </label>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit" [disabled]="loading">Pretrazi</button>
+      <button type="button" (click)="reset()" [disabled]="loading">Reset</button>
+    </div>
+  </form>
+
+  <div *ngIf="loading" class="status">Ucitavanje...</div>
+
+  <div *ngIf="searched && !loading && results.length === 0" class="status">
+    Nema rezultata.
+  </div>
+
+  <ul class="results" *ngIf="!loading && results.length > 0">
+    <li *ngFor="let r of results" class="result">
+      <h3>
+        <a [routerLink]="['/locations', r.name]">
+          <span *ngIf="r.highlights?.['name'] as nameHl; else plainName"
+                [innerHTML]="renderSnippet(nameHl[0])"></span>
+          <ng-template #plainName>{{ r.name }}</ng-template>
+        </a>
+      </h3>
+
+      <p class="desc">
+        <span *ngIf="r.highlights?.['descriptionUi'] as uiHl; else plainDesc"
+              [innerHTML]="renderSnippet(uiHl[0])"></span>
+        <ng-template #plainDesc>{{ r.descriptionUi }}</ng-template>
+      </p>
+
+      <p class="meta">
+        Prosecna ocena: <strong>{{ r.avgTotal | number:'1.1-2' }}</strong>
+        &nbsp;|&nbsp; Review-a: <strong>{{ r.reviewCount }}</strong>
+      </p>
+
+      <div *ngIf="r.highlights?.['descriptionPdf'] as pdfHl" class="pdf-snippets">
+        <p class="hint">Pronadjeno u PDF opisu:</p>
+        <ul>
+          <li *ngFor="let snip of pdfHl" [innerHTML]="renderSnippet(snip)"></li>
+        </ul>
+      </div>
+
+      <div class="actions">
+        <button type="button" (click)="similar(r.name)">Slicno ovome</button>
+        <a *ngIf="r.pdfKey" [href]="pdfUrl(r.pdfKey)" target="_blank">Preuzmi PDF</a>
+      </div>
+    </li>
+  </ul>
+</div>

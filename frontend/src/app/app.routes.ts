@@ -11,6 +11,7 @@ import { RegisterComponent } from './components/register/register';
 import { AccountRequestsComponent } from './components/account-requests/account-requests';
 import { AdminHomeComponent } from './components/admin-home/admin-home';
 import { ProfileComponent } from './components/profile/profile';
+import { SearchComponent } from './components/search/search';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -28,4 +29,5 @@ export const routes: Routes = [
   { path: 'locations/:name/managers', component: LocationManagersComponent },
   { path: 'locations/:name', component: LocationDetailsComponent },
   { path: 'my-locations', component: MyLocationsComponent },
+  { path: 'search', component: SearchComponent },
 ];

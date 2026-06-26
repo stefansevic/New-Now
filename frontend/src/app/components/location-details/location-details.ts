@@ -178,6 +178,11 @@ export class LocationDetailsComponent implements OnInit, OnDestroy {
     return `http://localhost:8080${imagePath}`;
   }
 
+  getPdfUrl(pdfKey: string): string {
+    if (pdfKey.startsWith('http')) return pdfKey;
+    return `http://localhost:8080${pdfKey}`;
+  }
+
   // Event management methods
   openEventForm(): void {
     this.showEventForm = true;

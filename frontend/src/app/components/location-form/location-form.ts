@@ -19,6 +19,9 @@ export class LocationFormComponent implements OnInit, OnDestroy {
   locationName: string | null = null;
   selectedImages: string[] = [];
   selectedFiles: File[] = [];
+  selectedPdfFile: File | null = null;
+  selectedPdfName: string = '';
+  existingPdfKey: string | null = null;
   isAdmin: boolean = false;
   private adminSubscription!: Subscription;
 
@@ -55,6 +58,7 @@ export class LocationFormComponent implements OnInit, OnDestroy {
             type: data.location.type,
             description: data.location.description
           });
+          this.existingPdfKey = data.pdfKey || null;
         },
         error: (err) => console.error(err)
       });
@@ -90,6 +94,31 @@ export class LocationFormComponent implements OnInit, OnDestroy {
     this.selectedFiles.splice(index, 1);
   }
 
+  onPdfSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    if (file.type !== 'application/pdf') {
+      alert('Samo PDF fajl je dozvoljen.');
+      input.value = '';
+      return;
+    }
+    this.selectedPdfFile = file;
+    this.selectedPdfName = file.name;
+    input.value = '';
+  }
+
+  removePdf(): void {
+    this.selectedPdfFile = null;
+    this.selectedPdfName = '';
+  }
+
+  getExistingPdfUrl(): string {
+    if (!this.existingPdfKey) return '';
+    if (this.existingPdfKey.startsWith('http')) return this.existingPdfKey;
+    return `http://localhost:8080${this.existingPdfKey}`;
+  }
+
   onSubmit(): void {
     if (this.locationForm.invalid) {
       return;
@@ -98,37 +127,63 @@ export class LocationFormComponent implements OnInit, OnDestroy {
     const formData = this.locationForm.getRawValue();
 
     if (this.isEditMode && this.locationName) {
-      this.locationService.updateLocation(this.locationName, {
-        address: formData.address,
-        type: formData.type,
-        description: formData.description
-      }).subscribe({
-        next: () => {
-          // Navigate to /my-locations if user is not admin (i.e., is a manager)
-          // Navigate to /locations if user is admin
-          const targetRoute = this.isAdmin ? '/locations' : '/my-locations';
-          this.router.navigate([targetRoute]);
-        },
-        error: (err) => console.error(err)
-      });
+      // edit: opciono nov PDF
+      const finishUpdate = (pdfKey: string | undefined) => {
+        const payload: any = {
+          address: formData.address,
+          type: formData.type,
+          description: formData.description
+        };
+        if (pdfKey !== undefined) payload.pdfKey = pdfKey;
+        this.locationService.updateLocation(this.locationName!, payload).subscribe({
+          next: () => {
+            const targetRoute = this.isAdmin ? '/locations' : '/my-locations';
+            this.router.navigate([targetRoute]);
+          },
+          error: (err) => console.error(err)
+        });
+      };
+
+      if (this.selectedPdfFile) {
+        this.locationService.uploadPdf(this.selectedPdfFile).subscribe({
+          next: (paths) => finishUpdate(paths[0]),
+          error: (err) => console.error(err)
+        });
+      } else {
+        finishUpdate(undefined);
+      }
     } else {
+      // create: slike obavezne, PDF opcioni
       if (this.selectedFiles.length === 0) {
         alert('At least one image is required.');
         return;
       }
+
+      const finishCreate = (imagePaths: string[], pdfKey: string | null) => {
+        const payload: any = {
+          name: formData.name,
+          address: formData.address,
+          type: formData.type,
+          description: formData.description,
+          imagePaths
+        };
+        if (pdfKey) payload.pdfKey = pdfKey;
+        this.locationService.createLocation(payload).subscribe({
+          next: () => this.router.navigate(['/locations']),
+          error: (err) => console.error(err)
+        });
+      };
+
       this.locationService.uploadImages(this.selectedFiles).subscribe({
         next: (paths) => {
-          const payload = {
-            name: formData.name,
-            address: formData.address,
-            type: formData.type,
-            description: formData.description,
-            imagePaths: paths
-          };
-          this.locationService.createLocation(payload).subscribe({
-            next: () => this.router.navigate(['/locations']),
-            error: (err) => console.error(err)
-          });
+          if (this.selectedPdfFile) {
+            this.locationService.uploadPdf(this.selectedPdfFile).subscribe({
+              next: (pdfPaths) => finishCreate(paths, pdfPaths[0]),
+              error: (err) => console.error(err)
+            });
+          } else {
+            finishCreate(paths, null);
+          }
         },
         error: (err) => console.error(err)
       });

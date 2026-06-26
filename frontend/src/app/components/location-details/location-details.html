@@ -29,6 +29,10 @@
     <div class="detail-item">
       <strong>Description:</strong> {{ location.location.description }}
     </div>
+    <div *ngIf="location.pdfKey" class="detail-item">
+      <strong>PDF opis:</strong>
+      <a [href]="getPdfUrl(location.pdfKey)" target="_blank">Preuzmi PDF</a>
+    </div>
   </div>
 
   <!-- Admin Actions -->
