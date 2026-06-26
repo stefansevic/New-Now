@@ -95,4 +95,9 @@ export class LocationsComponent implements OnInit, OnDestroy {
     }
     return `http://localhost:8080${imagePath}`;
   }
+
+  getPdfUrl(pdfKey: string): string {
+    if (pdfKey.startsWith('http')) return pdfKey;
+    return `http://localhost:8080${pdfKey}`;
+  }
 }

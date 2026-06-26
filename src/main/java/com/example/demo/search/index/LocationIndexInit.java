@@ -2,6 +2,8 @@ package com.example.demo.search.index;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,8 @@ import java.nio.charset.StandardCharsets;
 public class LocationIndexInit implements ApplicationRunner {
 
 	public static final String INDEX = "locations";
+
+	private static final Logger log = LoggerFactory.getLogger(LocationIndexInit.class);
 
 	private final ElasticsearchClient client;
 
@@ -79,10 +83,13 @@ public class LocationIndexInit implements ApplicationRunner {
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		boolean exists = client.indices().exists(b -> b.index(INDEX)).value();
-		if (exists) return;
+		if (exists) {
+			log.info("ES index '{}' already exists, skipping creation", INDEX);
+			return;
+		}
 
 		var in = new ByteArrayInputStream(SETTINGS.getBytes(StandardCharsets.UTF_8));
 		client.indices().create(CreateIndexRequest.of(b -> b.index(INDEX).withJson(in)));
-		System.out.println("Created ES index: " + INDEX);
+		log.info("Created ES index '{}'", INDEX);
 	}
 }

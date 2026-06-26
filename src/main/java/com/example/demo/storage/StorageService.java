@@ -6,6 +6,8 @@ import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.StatObjectArgs;
 import io.minio.StatObjectResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -13,6 +15,8 @@ import java.util.UUID;
 
 @Service
 public class StorageService {
+
+	private static final Logger log = LoggerFactory.getLogger(StorageService.class);
 
 	private final MinioClient client;
 	private final MinioProperties props;
@@ -60,7 +64,7 @@ public class StorageService {
 					.object(key)
 					.build());
 		} catch (Exception e) {
-			System.err.println("Failed to delete object: " + key + " (" + e.getMessage() + ")");
+			log.error("MinIO delete failed for key={}: {}", key, e.getMessage());
 		}
 	}
 

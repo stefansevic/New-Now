@@ -57,6 +57,9 @@
       </div>
       <p class="address">{{ item.location.address }}</p>
       <p class="type">{{ item.location.type }}</p>
+      <p *ngIf="item.pdfKey" class="pdf-link">
+        <a [href]="getPdfUrl(item.pdfKey)" target="_blank">Preuzmi PDF</a>
+      </p>
     </div>
 
     <!-- Admin Actions -->

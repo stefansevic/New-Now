@@ -1,12 +1,16 @@
 package com.example.demo.search.service;
 
 import org.apache.tika.Tika;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 
 @Component
 public class PdfTextExtractor {
+
+	private static final Logger log = LoggerFactory.getLogger(PdfTextExtractor.class);
 
 	private final Tika tika = new Tika();
 
@@ -15,7 +19,7 @@ public class PdfTextExtractor {
 		try {
 			return tika.parseToString(pdfStream);
 		} catch (Exception e) {
-			System.err.println("Tika parse failed: " + e.getMessage());
+			log.error("Tika PDF parse failed: {}", e.getMessage());
 			return "";
 		}
 	}

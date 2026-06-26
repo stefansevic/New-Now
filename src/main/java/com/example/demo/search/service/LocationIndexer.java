@@ -11,6 +11,8 @@ import com.example.demo.search.index.LocationIndexInit;
 import com.example.demo.storage.LocationPdf;
 import com.example.demo.storage.LocationPdfRepository;
 import com.example.demo.storage.StorageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -19,6 +21,8 @@ import java.util.List;
 
 @Service
 public class LocationIndexer {
+
+	private static final Logger log = LoggerFactory.getLogger(LocationIndexer.class);
 
 	private final ElasticsearchClient client;
 	private final ReviewRepository reviewRepo;
@@ -42,8 +46,10 @@ public class LocationIndexer {
 		try {
 			LocationDoc doc = buildDoc(location);
 			client.index(b -> b.index(LocationIndexInit.INDEX).id(location.getName()).document(doc));
+			log.info("Indexed location '{}' (reviewCount={}, avgTotal={})",
+					location.getName(), doc.getReviewCount(), doc.getAvgTotal());
 		} catch (Exception e) {
-			System.err.println("ES index failed for " + location.getName() + ": " + e.getMessage());
+			log.error("ES index failed for '{}': {}", location.getName(), e.getMessage());
 		}
 	}
 
@@ -54,8 +60,9 @@ public class LocationIndexer {
 	public void delete(String locationName) {
 		try {
 			client.delete(b -> b.index(LocationIndexInit.INDEX).id(locationName));
+			log.info("Removed location '{}' from ES index", locationName);
 		} catch (Exception e) {
-			System.err.println("ES delete failed for " + locationName + ": " + e.getMessage());
+			log.error("ES delete failed for '{}': {}", locationName, e.getMessage());
 		}
 	}
 
@@ -65,6 +72,7 @@ public class LocationIndexer {
 			index(loc);
 			count++;
 		}
+		log.info("Reindexed {} locations", count);
 		return count;
 	}
 
@@ -117,7 +125,7 @@ public class LocationIndexer {
 			try (InputStream in = storage.download(key)) {
 				doc.setDescriptionPdf(pdfExtractor.extract(in));
 			} catch (Exception e) {
-				System.err.println("PDF read failed for " + location.getName() + ": " + e.getMessage());
+				log.error("PDF read failed for '{}': {}", location.getName(), e.getMessage());
 				doc.setDescriptionPdf("");
 			}
 		} else {
