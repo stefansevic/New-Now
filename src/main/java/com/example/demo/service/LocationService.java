@@ -7,6 +7,7 @@ import com.example.demo.model.Rate;
 import com.example.demo.repository.ImageRepository;
 import com.example.demo.repository.LocationRepository;
 import com.example.demo.repository.ReviewRepository;
+import com.example.demo.search.service.LocationIndexer;
 import com.example.demo.storage.LocationPdf;
 import com.example.demo.storage.LocationPdfRepository;
 import com.example.demo.storage.StorageService;
@@ -23,15 +24,17 @@ public class LocationService {
     private final ImageRepository imageRepository;
     private final LocationPdfRepository pdfRepository;
     private final StorageService storage;
+    private final LocationIndexer indexer;
 
     public LocationService(LocationRepository locationRepository, ReviewRepository reviewRepository,
                            ImageRepository imageRepository, LocationPdfRepository pdfRepository,
-                           StorageService storage) {
+                           StorageService storage, LocationIndexer indexer) {
         this.locationRepository = locationRepository;
         this.reviewRepository = reviewRepository;
         this.imageRepository = imageRepository;
         this.pdfRepository = pdfRepository;
         this.storage = storage;
+        this.indexer = indexer;
     }
 
     // Kreiranje nove lokacije sa slikama i opcionim PDF-om
@@ -55,6 +58,7 @@ public class LocationService {
 			p.setPdfKey(pdfKey);
 			pdfRepository.save(p);
 		}
+		indexer.index(saved);
 		return saved;
 	}
 
@@ -87,6 +91,7 @@ public class LocationService {
 				pdfRepository.save(p);
 			}
 		}
+		indexer.reindex(saved);
 		return saved;
 	}
 
@@ -152,6 +157,7 @@ public class LocationService {
         });
 
         locationRepository.deleteById(name);
+        indexer.delete(name);
     }
 
     public record LocationDetails(Location location, double averageRating, List<Image> images, String pdfKey) {}

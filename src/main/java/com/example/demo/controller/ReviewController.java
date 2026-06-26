@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
+import com.example.demo.search.service.LocationIndexer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,11 +38,12 @@ public class ReviewController {
     private final RateRepository rateRepository;
     private final CommentRepository commentRepository;
     private final ManagesRepository managesRepository;
+    private final LocationIndexer indexer;
 
     public ReviewController(ReviewRepository reviewRepository, LocationRepository locationRepository,
                           EventRepository eventRepository, UserRepository userRepository,
                           RateRepository rateRepository, CommentRepository commentRepository,
-                          ManagesRepository managesRepository) {
+                          ManagesRepository managesRepository, LocationIndexer indexer) {
         this.reviewRepository = reviewRepository;
         this.locationRepository = locationRepository;
         this.eventRepository = eventRepository;
@@ -49,6 +51,7 @@ public class ReviewController {
         this.rateRepository = rateRepository;
         this.commentRepository = commentRepository;
         this.managesRepository = managesRepository;
+        this.indexer = indexer;
     }
 
     // Kreiranje review-a za lokaciju (samo user koji nije manager za tu lokaciju ili admin)
@@ -155,6 +158,7 @@ public class ReviewController {
             commentRepository.save(comment);
         }
 
+        indexer.reindex(location);
         return ResponseEntity.ok(review);
     }
 
@@ -226,6 +230,7 @@ public class ReviewController {
 
         review.setHidden(true);
         reviewRepository.save(review);
+        indexer.reindex(review.getLocation());
         return ResponseEntity.ok().build();
     }
 
@@ -249,10 +254,11 @@ public class ReviewController {
 
         review.setHidden(false);
         reviewRepository.save(review);
+        indexer.reindex(review.getLocation());
         return ResponseEntity.ok().build();
     }
 
-    // Delete review 
+    // Delete review
     @DeleteMapping("/{createdAt}")
     public ResponseEntity<?> deleteReview(@AuthenticationPrincipal UserDetails principal, 
                                          @PathVariable String createdAt) {
@@ -272,6 +278,7 @@ public class ReviewController {
 
         review.setDeleted(true);
         reviewRepository.save(review);
+        indexer.reindex(review.getLocation());
         return ResponseEntity.ok().build();
     }
 
