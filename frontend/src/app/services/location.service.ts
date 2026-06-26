@@ -34,7 +34,7 @@ export class LocationService {
   uploadImages(files: File[]): Observable<string[]> {
     const formData = new FormData();
     files.forEach(f => formData.append('files', f));
-    return this.http.post<string[]>(`/api/uploads`, formData);
+    return this.http.post<string[]>(`/api/files`, formData);
   }
 
   // Manager management methods

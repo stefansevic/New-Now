@@ -7,6 +7,9 @@ import com.example.demo.model.Rate;
 import com.example.demo.repository.ImageRepository;
 import com.example.demo.repository.LocationRepository;
 import com.example.demo.repository.ReviewRepository;
+import com.example.demo.storage.LocationPdf;
+import com.example.demo.storage.LocationPdfRepository;
+import com.example.demo.storage.StorageService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,15 +21,21 @@ public class LocationService {
     private final LocationRepository locationRepository;
     private final ReviewRepository reviewRepository;
     private final ImageRepository imageRepository;
+    private final LocationPdfRepository pdfRepository;
+    private final StorageService storage;
 
-    public LocationService(LocationRepository locationRepository, ReviewRepository reviewRepository, ImageRepository imageRepository) {
+    public LocationService(LocationRepository locationRepository, ReviewRepository reviewRepository,
+                           ImageRepository imageRepository, LocationPdfRepository pdfRepository,
+                           StorageService storage) {
         this.locationRepository = locationRepository;
         this.reviewRepository = reviewRepository;
         this.imageRepository = imageRepository;
+        this.pdfRepository = pdfRepository;
+        this.storage = storage;
     }
 
-    // Kreiranje nove lokacije sa slikom
-    public Location create(Location location, List<String> imagePaths) {
+    // Kreiranje nove lokacije sa slikama i opcionim PDF-om
+    public Location create(Location location, List<String> imagePaths, String pdfKey) {
 		if (location.getName() == null || location.getAddress() == null || location.getType() == null || location.getDescription() == null) {
 			throw new IllegalArgumentException("Missing required fields");
 		}
@@ -40,15 +49,45 @@ public class LocationService {
 			img.setLocation(saved);
 			imageRepository.save(img);
 		}
+		if (pdfKey != null && !pdfKey.isBlank()) {
+			LocationPdf p = new LocationPdf();
+			p.setLocationName(saved.getName());
+			p.setPdfKey(pdfKey);
+			pdfRepository.save(p);
+		}
 		return saved;
 	}
 
-    public Location update(String name, String address, String type, String description) {
+    public Location update(String name, String address, String type, String description, String pdfKey) {
 		Location loc = locationRepository.findById(name).orElseThrow();
 		Optional.ofNullable(address).ifPresent(loc::setAddress);
 		Optional.ofNullable(type).ifPresent(loc::setType);
 		Optional.ofNullable(description).ifPresent(loc::setDescription);
-		return locationRepository.save(loc);
+		Location saved = locationRepository.save(loc);
+
+		// pdfKey == null znaci ne diraj; prazan string znaci ukloni
+		if (pdfKey != null) {
+			Optional<LocationPdf> existing = pdfRepository.findById(name);
+			if (pdfKey.isBlank()) {
+				existing.ifPresent(p -> {
+					storage.delete(StorageService.stripUrlPrefix(p.getPdfKey()));
+					pdfRepository.delete(p);
+				});
+			} else if (existing.isPresent()) {
+				LocationPdf p = existing.get();
+				if (p.getPdfKey() != null && !p.getPdfKey().equals(pdfKey)) {
+					storage.delete(StorageService.stripUrlPrefix(p.getPdfKey()));
+				}
+				p.setPdfKey(pdfKey);
+				pdfRepository.save(p);
+			} else {
+				LocationPdf p = new LocationPdf();
+				p.setLocationName(saved.getName());
+				p.setPdfKey(pdfKey);
+				pdfRepository.save(p);
+			}
+		}
+		return saved;
 	}
 
 	// Racuna prosecnu ocenu lokacije na osnovu review-a (obrisani se ne racunaju)
@@ -62,7 +101,7 @@ public class LocationService {
 			if (r.getDeleted() != null && r.getDeleted()) {
 				continue;
 			}
-			
+
 			Rate rate = r.getRate();
 			if (rate == null) continue;
 			List<Integer> values = new ArrayList<>();
@@ -83,7 +122,8 @@ public class LocationService {
         Location location = locationRepository.findById(name).orElseThrow();
         double avgRating = computeAverageRating(location);
         List<Image> images = imageRepository.findByLocation(location);
-        return new LocationDetails(location, avgRating, images);
+        String pdfKey = pdfRepository.findById(name).map(LocationPdf::getPdfKey).orElse(null);
+        return new LocationDetails(location, avgRating, images, pdfKey);
     }
 
 	public List<LocationDetails> listAll() {
@@ -91,37 +131,28 @@ public class LocationService {
 		List<LocationDetails> details = new ArrayList<>();
 		for (Location l : locations) {
 			List<Image> images = imageRepository.findByLocation(l);
-			details.add(new LocationDetails(l, computeAverageRating(l), images));
+			String pdfKey = pdfRepository.findById(l.getName()).map(LocationPdf::getPdfKey).orElse(null);
+			details.add(new LocationDetails(l, computeAverageRating(l), images, pdfKey));
 		}
 		return details;
 	}
 
     public void delete(String name) {
         Location location = locationRepository.findById(name).orElseThrow();
-        
-        // Delete associated images from database
+
         List<Image> images = imageRepository.findByLocation(location);
-        imageRepository.deleteAll(images);
-        
-        // Delete image files from disk
         for (Image image : images) {
-            try {
-                String imagePath = image.getPath();
-                if (imagePath.startsWith("/uploads/")) {
-                    String fileName = imagePath.substring("/uploads/".length());
-                    java.nio.file.Path filePath = java.nio.file.Paths.get("uploads", fileName);
-                    java.nio.file.Files.deleteIfExists(filePath);
-                }
-            } catch (Exception e) {
-                System.err.println("Failed to delete image file: " + image.getPath());
-            }
+            storage.delete(StorageService.stripUrlPrefix(image.getPath()));
         }
-        
-        // Delete the location
+        imageRepository.deleteAll(images);
+
+        pdfRepository.findById(name).ifPresent(p -> {
+            storage.delete(StorageService.stripUrlPrefix(p.getPdfKey()));
+            pdfRepository.delete(p);
+        });
+
         locationRepository.deleteById(name);
     }
 
-    public record LocationDetails(Location location, double averageRating, List<Image> images) {}
+    public record LocationDetails(Location location, double averageRating, List<Image> images, String pdfKey) {}
 }
-
-

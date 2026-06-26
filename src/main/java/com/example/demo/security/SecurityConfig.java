@@ -41,6 +41,7 @@ public class SecurityConfig {
 						.requestMatchers("/api/auth/**", "/api/account-requests/**").permitAll()
 						.requestMatchers("/h2-console/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/locations/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/files/**").permitAll()
 						.requestMatchers("/api/**").authenticated()
 						.requestMatchers(HttpMethod.GET, "/**").permitAll()
 						.anyRequest().authenticated()

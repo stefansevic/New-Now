@@ -13,8 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
-record CreateLocationRequest(String name, String address, String type, String description, List<String> imagePaths) {}
-record UpdateLocationRequest(String address, String type, String description) {}
+record CreateLocationRequest(String name, String address, String type, String description, List<String> imagePaths, String pdfKey) {}
+record UpdateLocationRequest(String address, String type, String description, String pdfKey) {}
 
 @RestController
 @RequestMapping("/api/locations")
@@ -44,7 +44,7 @@ public class LocationController {
 		l.setAddress(req.address());
 		l.setType(req.type());
 		l.setDescription(req.description());
-		return ResponseEntity.ok(locationService.create(l, req.imagePaths()));
+		return ResponseEntity.ok(locationService.create(l, req.imagePaths(), req.pdfKey()));
 	}
 
     // Update lokacije moze admin ili menadzer te lokacije
@@ -57,7 +57,7 @@ public class LocationController {
                 .findByUserEmailAndLocationName(email, name)
                 .isEmpty();
         if (!(isAdmin || isManager)) return ResponseEntity.status(403).build();
-        return ResponseEntity.ok(locationService.update(name, req.address(), req.type(), req.description()));
+        return ResponseEntity.ok(locationService.update(name, req.address(), req.type(), req.description(), req.pdfKey()));
     }
 
 	@GetMapping("/{name}")
